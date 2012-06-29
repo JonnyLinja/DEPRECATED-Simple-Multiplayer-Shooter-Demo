@@ -1,0 +1,442 @@
+package net.flashpunk {
+	import net.flashpunk.World;
+	import net.flashpunk.Entity;
+	import net.flashpunk.FP;
+	
+	//temp debug
+	import general.Utils;
+	
+	public class RollbackableWorld extends World implements Rollbackable {
+		/**
+		 * Boolean indicating if world is true or perceived world
+		 */
+		public var isTrueWorld:Boolean = false;
+		
+		public function RollbackableWorld() {
+			
+		}
+		
+		/**
+		 * Modified to run preupdates first
+		 */
+		override public function update():void {
+			// preupdate checks
+			var e:RollbackableEntity = _updateFirst as RollbackableEntity;
+			while (e) {
+				if (e.active)
+					e.determineShouldVariablesBasedOnCollision();
+				e = e._updateNext as RollbackableEntity;
+			}
+			
+			//super
+			super.update();
+		}
+		
+		/**
+		 * Modified to also call destroy master list
+		 */
+		override public function removeAll():void {
+			super.removeAll();
+			destroyMasterList();
+		}
+		
+		/**
+		 * Meant to be called on ending the world. Destroys the entire Master list.
+		 * Does not use updateLists because there's no need to -> done at the end of World
+		 */
+		public function destroyMasterList():void {
+			//declare variables
+			var e:RollbackableEntity = _firstEntity as RollbackableEntity;
+			var n:RollbackableEntity = null;
+			
+			//loop destroy
+			while (e) {
+				n = e._next as RollbackableEntity;
+				e._next = null;
+				e._world = null;
+				e.removed();
+				e = n;
+			}
+		}
+		
+		/**
+		 * Modified to set isTrueEntity
+		 * @param	e
+		 * @return
+		 */
+		override public function add(e:Entity):Entity {
+			//cast
+			var r:RollbackableEntity = e as RollbackableEntity;
+			
+			//set is true
+			r.isTrueEntity = isTrueWorld;
+			
+			//super
+			return super.add(r);
+		}
+		
+		/**
+		 * Modified to accomodate doubly linked recycle list
+		 * Modified to set isTrueEntity
+		 */
+		override public function create(classType:Class, addToWorld:Boolean = true):Entity {
+			var e:RollbackableEntity = _recycled[classType] as RollbackableEntity;
+			if (e) {
+				if(e._recycleNext)
+					(e._recycleNext as RollbackableEntity)._recyclePrev = null;
+			}
+			e = super.create(classType, addToWorld) as RollbackableEntity;
+			e.isTrueEntity = isTrueWorld;
+			
+			// return
+			return e;
+		}
+		
+		/**
+		 * Returns the unrecycled Entity.
+		 * @param	e				The Entity to unrecycle.
+		 * @param	addToWorld		Add it to the World immediately.
+		 * @return	The Entity object.
+		 */
+		public function unrecycle(e:RollbackableEntity, addToWorld:Boolean = true):Entity {
+			//connect the surrounding elements
+			if(e._recycleNext)
+				(e._recycleNext as RollbackableEntity)._recyclePrev = e._recyclePrev;
+			if(e._recyclePrev)
+				(e._recyclePrev as RollbackableEntity)._recycleNext = e._recycleNext;
+			
+			//move head
+			if (e == _recycled[e._class])
+				_recycled[e._class] = e._recycleNext;
+			
+			//make connects null
+			e._recyclePrev = null;
+			e._recycleNext = null;
+			
+			if (addToWorld) return add(e);
+				return e;
+		}
+		
+		/**
+		 * Copied static version of parent
+		 * Modified to set recycle next to null
+		 */
+		public static function clearRecycled(classType:Class):void {
+			var e:RollbackableEntity = _recycled[classType],
+				n:RollbackableEntity;
+			while (e) {
+				n = e._recycleNext as RollbackableEntity;
+				e._recycleNext = null;
+				e._recyclePrev = null;
+				e = n;
+			}
+			delete _recycled[classType];
+		}
+		
+		/**
+		 * Modified to add to master list and add unrecycled entities
+		 */
+		override public function updateLists():void {
+			var e:RollbackableEntity;
+			
+			// remove entities
+			if (_remove.length)
+			{
+				for each (e in _remove)
+				{
+					if (!e._world)
+					{
+						if(_add.indexOf(e) >= 0)
+							_add.splice(_add.indexOf(e), 1);
+						
+						continue;
+					}
+					if (e._world !== this)
+						continue;
+					
+					e.removed();
+					e._world = null;
+					
+					removeUpdate(e);
+					removeRender(e);
+					if (e._type) removeType(e);
+					if (e._name) unregisterName(e);
+					if (e.autoClear && e._tween) e.clearTweens();
+				}
+				_remove.length = 0;
+			}
+			
+			// add entities
+			if (_add.length)
+			{
+				for each (e in _add)
+				{
+					//add to master list
+					if (!e._created)
+					{
+						e._created = true;
+						addToMasterList(e);
+					}
+					
+					//add brand new Entity to recycled list
+					if (e._world)
+					{
+						e._world = null;
+						e._recycleNext = null;
+						_recycle[_recycle.length] = e;
+						continue;
+					}
+					
+					//add to update and render
+					addUpdate(e);
+					addRender(e);
+					if (e._type) addType(e);
+					if (e._name) registerName(e);
+					
+					e._world = this;
+					e.added();
+				}
+				_add.length = 0;
+			}
+			
+			// recycle entities
+			if (_recycle.length)
+			{
+				for each (e in _recycle)
+				{
+					if (e._world || e._recycleNext)
+						continue;
+					
+					e._recycleNext = _recycled[e._class];
+					if(e._recycleNext)
+						(e._recycleNext as RollbackableEntity)._recyclePrev = e;
+					_recycled[e._class] = e;
+				}
+				_recycle.length = 0;
+			}
+			
+			// sort the depth list
+			if (_layerSort)
+			{
+				if (_layerList.length > 1) FP.sort(_layerList, true);
+				_layerSort = false;
+			}
+		}
+		
+		/**
+		 * Initializes the sync point
+		 * Called after the preloaded Entities have been added
+		 */
+		public function beginSync():void {
+			_syncPoint = _lastEntity;
+		}
+		
+		/**
+		 * Ensures master lists are the same
+		 * Adds unrecycled entities from w to this world
+		 * @param	w
+		 */
+		public function synchronize(w:RollbackableWorld):void {
+			//default sync point
+			if (!w._syncPoint) {
+				//temp debugging
+				Utils.log(w.isTrueWorld + " HAS NO SYNC POINT?");
+				return;
+			}
+			
+			//temp debug
+			var addCount:int = 0;
+			updateLists(); //slow inefficient
+			w.updateLists(); //slow inefficient
+			var origSyncPoint:RollbackableEntity = _syncPoint;
+			var wOrigSyncPoint:RollbackableEntity = w._syncPoint;
+			
+			//temp debug
+			var count1:int = 0;
+			var count2:int = 0;
+			var r:RollbackableEntity = _firstEntity as RollbackableEntity;
+			while (r) {
+				if (isTrueWorld != r.isTrueEntity)
+					Utils.log("pre " + isTrueWorld + " synchro reverse type " + r._class.toString());
+				r = r._next;
+				count1++;
+			}
+			r = w._firstEntity as RollbackableEntity;
+			while (r) {
+				if (!isTrueWorld != r.isTrueEntity)
+					Utils.log("pre " + !isTrueWorld + " synchro reverse type " + r._class.toString());
+				r = r._next;
+				count2++;
+			}
+			
+			//increment to next
+			w._syncPoint = w._syncPoint._next;
+			
+			//loop
+			while (w._syncPoint) {
+				//add unrecycled
+				var e:Entity = new w._syncPoint._class;
+				e._world = this; //force it to be added as recycled
+				add(e);
+				
+				//increment
+				w._syncPoint = w._syncPoint._next;
+				
+				//temp debug
+				addCount++;
+			}
+			
+			//update
+			updateLists();
+			
+			//set sync points
+			_syncPoint = _lastEntity;
+			w._syncPoint = w._lastEntity;
+			
+			//temp debugging
+			count1 = 0;
+			count2 = 0;
+			r = _firstEntity as RollbackableEntity;
+			while (r) {
+				if (isTrueWorld != r.isTrueEntity)
+					Utils.log(isTrueWorld + " synchro reverse type " + r._class.toString());
+				r = r._next;
+				count1++;
+			}
+			r = w._firstEntity as RollbackableEntity;
+			while (r) {
+				if (!isTrueWorld != r.isTrueEntity)
+					Utils.log(!isTrueWorld + " synchro reverse type " + r._class.toString());
+				r = r._next;
+				count2++;
+			}
+			if (count1 != count2) {
+				_syncPoint = origSyncPoint;
+				w._syncPoint = wOrigSyncPoint;
+				Utils.log("sync failed!");
+				Utils.log("only added " + addCount + "unrecycled !");
+				Utils.log(count1 + " vs " + count2);
+				Utils.log(isTrueWorld.toString());
+				Utils.log(toString());
+				Utils.log(w.isTrueWorld.toString());
+				Utils.log(w.toString());
+				_syncPoint = _lastEntity;
+				w._syncPoint = w._lastEntity;
+			}
+		}
+		
+		/**
+		 * Rolls back primitive values of current World's Entities to the old World's Entities
+		 * Assumes both worlds have already been synchronized
+		 * @param	w	World to be rolled back to
+		 */
+		public function rollback(orig:Rollbackable):void {
+			//temp debug
+			if (isTrueWorld)
+				Utils.log("reverse rollback world");
+			
+			//declare vars
+			var w:RollbackableWorld = orig as RollbackableWorld;
+			var thisCurrentEntity:RollbackableEntity = _firstEntity;
+			var oldCurrentEntity:RollbackableEntity = w._firstEntity;
+			
+			//loop through all entities to be rolled back to
+			while (oldCurrentEntity) {
+				//temp debug
+				if (!thisCurrentEntity) {
+					Utils.log("no current entity!");
+					Utils.log(toString());
+					Utils.log(w.toString());
+				}
+				
+				//rollback
+				if (oldCurrentEntity._world && !thisCurrentEntity._world) {
+					//unrecycle entity and rollback
+					unrecycle(thisCurrentEntity);
+					thisCurrentEntity.rollback(oldCurrentEntity);
+				}else if (!oldCurrentEntity._world && thisCurrentEntity._world) {
+					//recycle entity
+					recycle(thisCurrentEntity);
+				}else if(oldCurrentEntity._world && thisCurrentEntity._world) {
+					//just rollback
+					thisCurrentEntity.rollback(oldCurrentEntity);
+				}
+				
+				//temp debug
+				if (thisCurrentEntity.isTrueEntity != isTrueWorld) {
+					Utils.log("rollback " + isTrueWorld + " world reverse type " + thisCurrentEntity._class.toString());
+				}
+				if (oldCurrentEntity.isTrueEntity == isTrueWorld) {
+					Utils.log("rollback " + !isTrueWorld + " world reverse type " + oldCurrentEntity._class.toString());
+				}
+				
+				//increment
+				thisCurrentEntity = thisCurrentEntity._next;
+				oldCurrentEntity = oldCurrentEntity._next;
+			}
+			
+			//update lists
+			updateLists();
+			w.updateLists();
+			
+			//temp debug
+			var count1:int = 0;
+			var count2:int = 0;
+			var r:RollbackableEntity = _firstEntity as RollbackableEntity;
+			while (r) {
+				if (isTrueWorld != r.isTrueEntity)
+					Utils.log("post " + isTrueWorld + " rollback reverse type " + r._class.toString());
+				r = r._next;
+				count1++;
+			}
+			r = w._firstEntity as RollbackableEntity;
+			while (r) {
+				if (!isTrueWorld != r.isTrueEntity)
+					Utils.log("post " + !isTrueWorld + " rollback reverse type " + r._class.toString());
+				r = r._next;
+				count2++;
+			}
+		}
+		
+		/** @private Adds Entity to the master list. */
+		private function addToMasterList(e:RollbackableEntity):void {
+			// add to master list
+			if (_lastEntity) {
+				//not first entry into list
+				_lastEntity._next = e;
+				_lastEntity = e;
+			}else {
+				//first entry
+				_firstEntity = e;
+				_lastEntity = e;
+			}
+			
+			//cleanup
+			e._next = null;
+		}
+		
+		/**
+		 * Debugging purposes
+		 * Temporary
+		 * @return
+		 */
+		public function toString():String {
+			var result:String = "Class\tactive\tx, y\n";
+			var entity:RollbackableEntity = _firstEntity;
+			while (entity != null) {
+				result += entity.toString();
+				if (entity == _syncPoint)
+					result += "\tsync";
+				result += "\n";
+				
+				entity = entity._next;
+			}
+			return result;
+		}
+		
+		// Rollback information.
+		 /** @private */ private var _firstEntity:RollbackableEntity;
+		 /** @private */ private var _lastEntity:RollbackableEntity;
+		 /** @private */ private var _syncPoint:RollbackableEntity;
+	}
+}
