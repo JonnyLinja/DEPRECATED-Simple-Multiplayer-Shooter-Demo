@@ -112,6 +112,11 @@ package net.flashpunk {
 			
 			// add entities
 			if (_add.length) {
+				
+				//helper
+				var callAdded:Boolean = false;
+				var r:RollbackableEntity = null;
+				
 				for each (e in _add) {
 					//add to master list
 					if (!e._created) {
@@ -129,15 +134,24 @@ package net.flashpunk {
 						continue;
 					}
 					
+					//set world
+					e._world = this;
+					
+					//set callAdded if is not a unrecycle
+					r = e as RollbackableEntity;
+					callAdded = (r._typePriority == 0 || r._updatePriority == 0);
+					
 					//add to update and render
 					addUpdate(e);
 					addRender(e);
 					if (e._type) addType(e);
 					if (e._name) registerName(e);
 					
-					e._world = this;
-					e.added();
+					//call added
+					if(callAdded)
+						e.added();
 				}
+				//set length
 				_add.length = 0;
 			}
 			
@@ -184,16 +198,73 @@ package net.flashpunk {
 		 * @param	e
 		 */
 		override protected function addUpdate(e:Entity):void {
-			// add to update list
-			if (_updateFirst) {
-				_updateFirst._updatePrev = e;
-				e._updateNext = _updateFirst;
+			//cast
+			var r:RollbackableEntity = e as RollbackableEntity;
+			
+			if (!_updateFirst) {
+				//no head
+				
+				//set priority
+				r._updatePriority = 1;
+				
+				//connect
+				r._updatePrev = null;
+				r._updateNext = null;
+				
+				//set head
+				_updateFirst = r;
+			}else {
+				//has head
+				
+				//declare variables
+				var current:RollbackableEntity = _updateFirst as RollbackableEntity;
+				var last:RollbackableEntity = null;
+				
+				//set initial update priority
+				if (r._updatePriority == 0)
+					r._updatePriority = current._updatePriority + 1;
+				
+				//loop
+				while (current) {
+					//found position
+					if (r._updatePriority > current._updatePriority)
+						break;
+					
+					//increment
+					last = current;
+					current = current._updateNext as RollbackableEntity;
+				}
+				
+				//insert
+				if(!current) {
+					//end of list
+					
+					//connect
+					last._updateNext = r;
+					r._updatePrev = last;
+					r._updateNext = null;
+				}else {
+					//insert here
+					
+					//connect
+					r._updateNext = current;
+					if (current == _updateFirst) {
+						//is the head
+						_updateFirst = r;
+						r._updatePrev = null;
+					}else {
+						//not the head
+						r._updatePrev = current._updatePrev;
+						r._updatePrev._updateNext = r;
+					}
+					current._updatePrev = r;
+				}
 			}
-			else e._updateNext = null;
-			e._updatePrev = null;
-			_updateFirst = e;
+			
+			//increment variables
 			_count ++;
-			if (!_classCount[e._class]) _classCount[e._class] = 0;
+			if (!_classCount[e._class])
+				_classCount[e._class] = 0;
 			_classCount[e._class] ++;
 		}
 		
@@ -202,14 +273,12 @@ package net.flashpunk {
 		 * @param	e
 		 */
 		override protected function removeUpdate(e:Entity):void {
-			// remove from the update list
-			if (_updateFirst == e) _updateFirst = e._updateNext;
-			if (e._updateNext) e._updateNext._updatePrev = e._updatePrev;
-			if (e._updatePrev) e._updatePrev._updateNext = e._updateNext;
-			e._updateNext = e._updatePrev = null;
+			//reset priority
+			var r:RollbackableEntity = e as RollbackableEntity;
+			r._updatePriority = 0;
 			
-			_count --;
-			_classCount[e._class] --;
+			//super
+			super.removeUpdate(r);
 		}
 		
 		/**
@@ -217,17 +286,74 @@ package net.flashpunk {
 		 * @param	e
 		 */
 		override internal function addType(e:Entity):void {
-			// add to type list
-			if (_typeFirst[e._type]) {
-				_typeFirst[e._type]._typePrev = e;
-				e._typeNext = _typeFirst[e._type];
-				_typeCount[e._type] ++;
-			}else {
-				e._typeNext = null;
+			//cast
+			var r:RollbackableEntity = e as RollbackableEntity;
+			
+			if (!_typeFirst[e._type]) {
+				//no head
+				
+				//set priority
+				r._typePriority = 1;
+				
+				//connect
+				r._typePrev = null;
+				r._typeNext = null;
+				
+				//set head
+				_typeFirst[e._type] = r;
+				
+				//increment
 				_typeCount[e._type] = 1;
+			}else {
+				//has head
+				
+				//declare variables
+				var current:RollbackableEntity = _typeFirst[e._type] as RollbackableEntity;
+				var last:RollbackableEntity = null;
+				
+				//set initial update priority
+				if (r._typePriority == 0)
+					r._typePriority = current._typePriority + 1;
+				
+				//loop
+				while (current) {
+					//found position
+					if (r._typePriority > current._typePriority)
+						break;
+					
+					//increment
+					last = current;
+					current = current._typeNext as RollbackableEntity;
+				}
+				
+				//insert
+				if(!current) {
+					//end of list
+					
+					//connect
+					last._typeNext = r;
+					r._typePrev = last;
+					r._typeNext = null;
+				}else {
+					//insert here
+					
+					//connect
+					r._typeNext = current;
+					if (current == _typeFirst[e._type]) {
+						//is the head
+						_typeFirst[e._type] = r;
+						r._typePrev = null;
+					}else {
+						//not the head
+						r._typePrev = current._typePrev;
+						(r._typePrev)._typeNext = r;
+					}
+					current._typePrev = r;
+				}
+				
+				//increment
+				_typeCount[e._type]++;
 			}
-			e._typePrev = null;
-			_typeFirst[e._type] = e;
 		}
 		
 		/**
@@ -235,12 +361,12 @@ package net.flashpunk {
 		 * @param	e
 		 */
 		override internal function removeType(e:Entity):void {
-			// remove from the type list
-			if (_typeFirst[e._type] == e) _typeFirst[e._type] = e._typeNext;
-			if (e._typeNext) e._typeNext._typePrev = e._typePrev;
-			if (e._typePrev) e._typePrev._typeNext = e._typeNext;
-			e._typeNext = e._typePrev = null;
-			_typeCount[e._type] --;
+			//reset priority
+			var r:RollbackableEntity = e as RollbackableEntity;
+			r._typePriority = 0;
+			
+			//super
+			super.removeType(e);
 		}
 		
 		/**
@@ -409,6 +535,54 @@ package net.flashpunk {
 					Utils.log(msg + " " + isTrueWorld + " reverse type " + r._class.toString());
 				r = r._next;
 			}
+		}
+		
+		/**
+		 * temp debug
+		 */
+		public function checkUpdateList():void {
+			if (!_updateFirst) {
+				Utils.log(isTrueWorld + " no head yet");
+				return;
+			}
+			
+			var r:RollbackableEntity = _updateFirst as RollbackableEntity;
+			var priority:int = r._updatePriority;
+			if (r._updatePrev)
+				Utils.log(isTrueWorld + " head has a previous");
+			var display:String = isTrueWorld + " update priority > (0 [" + priority + "]";
+			if (r._updateNext)
+				display += " " + (r._updateNext as RollbackableEntity)._updatePriority + ") ";
+			else
+				display += " 0) ";
+			if (!r.world)
+				Utils.log(isTrueWorld + " " + r._updatePriority + " entity null world");
+			r = r._updateNext as RollbackableEntity;
+			while (r) {
+				if (priority < r._updatePriority)
+					Utils.log(isTrueWorld + " priority out of whack");
+				
+				if (!r.world)
+					Utils.log(isTrueWorld + " " + r._updatePriority + " entity null world");
+				
+				if (r) {
+					display += "(";
+					if (r._updatePrev)
+						display += (r._updatePrev as RollbackableEntity)._updatePriority;
+					else
+						display += "0";
+					display += " [" + r._updatePriority + "]";
+					if (r._updateNext)
+						display += " " + (r._updateNext as RollbackableEntity)._updatePriority;
+					else
+						display += " 0";
+					display += ") ";
+				}
+				
+				priority = r._updatePriority;
+				r = r._updateNext as RollbackableEntity;
+			}
+			Utils.log(display);
 		}
 		
 		// Rollback information.

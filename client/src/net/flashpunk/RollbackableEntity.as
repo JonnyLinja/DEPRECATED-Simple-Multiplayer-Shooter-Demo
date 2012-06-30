@@ -168,6 +168,10 @@ package net.flashpunk {
 			//declare variables
 			var e:RollbackableEntity = orig as RollbackableEntity;
 			
+			//priority
+			_updatePriority = e._updatePriority;
+			_typePriority = e._typePriority;
+			
 			//position
 			x = e.x;
 			y = e.y;
@@ -190,8 +194,8 @@ package net.flashpunk {
 			return this.getClass() + "\t" + (this.world != null) + "\t" + x + ", " + y;
 		}
 		
-		/** @private */ internal var _updateOrder:int = 0; //to ensure that perceived and true worlds update entities in the same order
-		/** @private */ internal var _typeOrder:int = 0; //to ensure that perceived and true worlds check collisions in the same order
+		/** @private */ internal var _updatePriority:int = 0; //to ensure that perceived and true worlds update entities in the same order
+		/** @private */ internal var _typePriority:int = 0; //to ensure that perceived and true worlds check collisions in the same order
 		/** @private */ internal var _created:Boolean; //to determine if should add to the master list
 		/** @private */ internal var _next:RollbackableEntity; //master list
 		/** @private */ internal var _recyclePrev:RollbackableEntity; //doubly linked recycle
