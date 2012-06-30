@@ -19,6 +19,23 @@ package net.flashpunk {
 		}
 		
 		/**
+		 * Untested to see if it removes properly
+		 * Modified to remove all
+		 * Modified to destroy master list
+		 * Modified to destroy private recycled list
+		 */
+		override public function end():void {
+			//super
+			super.end();
+			
+			//remove
+			removeAll();
+			updateLists();
+			destroyRecycled();
+			destroyMasterList();
+		}
+		
+		/**
 		 * Modified to run preupdates first
 		 */
 		override public function update():void {
@@ -47,14 +64,6 @@ package net.flashpunk {
 		}
 		
 		/**
-		 * Modified to also call destroy master list
-		 */
-		override public function removeAll():void {
-			super.removeAll();
-			destroyMasterList();
-		}
-		
-		/**
 		 * Meant to be called on ending the world. Destroys the entire Master list.
 		 * Does not use updateLists because there's no need to -> done at the end of World
 		 */
@@ -74,6 +83,32 @@ package net.flashpunk {
 		}
 		
 		/**
+		 * Clears stored recycled Entities of the Class type.
+		 * Done for the custom _recycled of RollbackableWorld
+		 * @param	classType		The Class type to clear.
+		 */
+		private function clearRecycled(classType:Class):void {
+			var e:RollbackableEntity = _recycled[classType],
+				n:RollbackableEntity;
+			while (e)
+			{
+				n = e._recycleNext as RollbackableEntity;
+				e._recyclePrev = null;
+				e._recycleNext = null;
+				e = n;
+			}
+			delete _recycled[classType];
+		}
+		
+		/**
+		 * Clears stored recycled Entities of all Class types.
+		 * Done for the custom _recycled of RollbackableWorld
+		 */
+		public function destroyRecycled():void {
+			for (var classType:Object in _recycled) clearRecycled(classType as Class);
+		}
+		
+		/**
 		 * Modified to set isTrueEntity
 		 * @param	e
 		 * @return
@@ -90,6 +125,7 @@ package net.flashpunk {
 		}
 		
 		/**
+		 * Modified to use private _recycled variable
 		 * Modified to accomodate doubly linked recycle list
 		 * Modified to set isTrueEntity
 		 */
@@ -98,14 +134,18 @@ package net.flashpunk {
 			if (e) {
 				if(e._recycleNext)
 					(e._recycleNext as RollbackableEntity)._recyclePrev = null;
+				_recycled[classType] = e._recycleNext;
+				e._recycleNext = null;
+				Utils.log("successfully using private recycled"); //temp debug
 			}
-			e = super.create(classType, addToWorld) as RollbackableEntity;
+			else e = new classType;
 			e.isTrueEntity = isTrueWorld;
 			
 			//temp debug
 			checkEntityListForErrors("post create");
 			
 			// return
+			if (addToWorld) return add(e);
 			return e;
 		}
 		
@@ -133,24 +173,6 @@ package net.flashpunk {
 			if (addToWorld) return add(e);
 				return e;
 		}
-		
-		/**
-		 * Copied static version of parent
-		 * Modified to set recycle next to null
-		 */
-		/*
-		public static function clearRecycled(classType:Class):void {
-			var e:RollbackableEntity = _recycled[classType],
-				n:RollbackableEntity;
-			while (e) {
-				n = e._recycleNext as RollbackableEntity;
-				e._recycleNext = null;
-				e._recyclePrev = null;
-				e = n;
-			}
-			delete _recycled[classType];
-		}
-		*/
 		
 		/**
 		 * Modified to add to master list and add unrecycled entities
