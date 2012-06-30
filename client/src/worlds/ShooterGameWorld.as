@@ -11,9 +11,6 @@ package worlds {
 	
 	import general.CommandList;
 	
-	//temp debugging
-	import general.Utils;
-	
 	public class ShooterGameWorld extends GameWorld {
 		//entities
 		private var p1:Person = new Human(10, 10);
@@ -67,9 +64,6 @@ package worlds {
 					break;
 				case CommandList.mouse:
 					p.mouseDown = !p.mouseDown;
-					//temp debugging
-					//if (isTrueWorld)
-						//Utils.log("true mouse is " + p.mouseDown);
 					break;
 			}
 		}

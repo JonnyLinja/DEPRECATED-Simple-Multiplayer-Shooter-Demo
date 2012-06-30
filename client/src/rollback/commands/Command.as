@@ -7,7 +7,7 @@ package rollback.commands {
 		public var x:Number;
 		public var y:Number;
 		
-		//temporary - debugging
+		//temp debugging
 		public var executedFrame:uint;
 		
 		//linked list

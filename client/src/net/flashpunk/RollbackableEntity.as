@@ -3,9 +3,6 @@ package net.flashpunk {
 	
 	import net.flashpunk.Entity;
 	
-	//temp debug
-	import general.Utils;
-	
 	public class RollbackableEntity extends Entity implements Rollbackable {
 		/**
 		 * Boolean indicating if entity exists in true or perceived world
@@ -80,10 +77,6 @@ package net.flashpunk {
 			
 			//resolve
 			resolveShouldVariables();
-			
-			//temp debug
-			if (!_renderPrev && !_renderNext)
-				Utils.log("omg no render prev or next");
 		}
 		
 		/**
@@ -222,16 +215,8 @@ package net.flashpunk {
 		 * @param	oldEntity	entity to be rolled back to
 		 */
 		public function rollback(orig:Rollbackable):void {
-			//temp debug
-			if (isTrueEntity)
-				Utils.log("reverse rollback " + this._class.toString());
-			
 			//declare variables
 			var e:RollbackableEntity = orig as RollbackableEntity;
-			
-			//temp debug
-			if (!e.isTrueEntity)
-				Utils.log("dereverse rollback " + e._class.toString());
 			
 			//position
 			x = e.x;

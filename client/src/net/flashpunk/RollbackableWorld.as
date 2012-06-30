@@ -39,10 +39,6 @@ package net.flashpunk {
 		 * Modified to run preupdates first
 		 */
 		override public function update():void {
-			//temp debug
-			updateLists();
-			checkEntityListForErrors("pre update");
-			
 			// preupdate checks
 			var e:RollbackableEntity = _updateFirst as RollbackableEntity;
 			while (e) {
@@ -51,16 +47,8 @@ package net.flashpunk {
 				e = e._updateNext as RollbackableEntity;
 			}
 			
-			//temp debug
-			updateLists();
-			checkEntityListForErrors("mid update");
-			
 			//super
 			super.update();
-			
-			//temp debug
-			updateLists();
-			checkEntityListForErrors("post update");
 		}
 		
 		/**
@@ -136,13 +124,9 @@ package net.flashpunk {
 					(e._recycleNext as RollbackableEntity)._recyclePrev = null;
 				_recycled[classType] = e._recycleNext;
 				e._recycleNext = null;
-				Utils.log("successfully using private recycled"); //temp debug
 			}
 			else e = new classType;
 			e.isTrueEntity = isTrueWorld;
-			
-			//temp debug
-			checkEntityListForErrors("post create");
 			
 			// return
 			if (addToWorld) return add(e);
@@ -178,9 +162,6 @@ package net.flashpunk {
 		 * Modified to add to master list and add unrecycled entities
 		 */
 		override public function updateLists():void {
-			//temp debug
-			checkEntityListForErrors("pre update lists");
-			
 			var e:RollbackableEntity;
 			
 			// remove entities
@@ -267,9 +248,6 @@ package net.flashpunk {
 				if (_layerList.length > 1) FP.sort(_layerList, true);
 				_layerSort = false;
 			}
-			
-			//temp debug
-			checkEntityListForErrors("post update lists");
 		}
 		
 		/**
@@ -287,60 +265,8 @@ package net.flashpunk {
 		 */
 		public function synchronize(w:RollbackableWorld):void {
 			//default sync point
-			if (!w._syncPoint) {
-				//temp debugging
-				Utils.log(w.isTrueWorld + " HAS NO SYNC POINT?");
+			if (!w._syncPoint)
 				return;
-			}
-			
-			//temp debug
-			var count1:int = 0;
-			var count2:int = 0;
-			var r:RollbackableEntity = _firstEntity as RollbackableEntity;
-			while (r) {
-				if (isTrueWorld != r.isTrueEntity)
-					Utils.log("pre " + isTrueWorld + " synchro reverse type " + r._class.toString());
-				r = r._next;
-				count1++;
-			}
-			r = w._firstEntity as RollbackableEntity;
-			while (r) {
-				if (!isTrueWorld != r.isTrueEntity)
-					Utils.log("pre " + !isTrueWorld + " synchro reverse type " + r._class.toString());
-				r = r._next;
-				count2++;
-			}
-			if (count1 != count2) {
-				Utils.log("pre sync failed!");
-			}
-			
-			//temp debug
-			var addCount:int = 0;
-			updateLists(); //slow inefficient
-			w.updateLists(); //slow inefficient
-			var origSyncPoint:RollbackableEntity = _syncPoint;
-			var wOrigSyncPoint:RollbackableEntity = w._syncPoint;
-			
-			//temp debug
-			count1 = 0;
-			count2 = 0;
-			r = _firstEntity as RollbackableEntity;
-			while (r) {
-				if (isTrueWorld != r.isTrueEntity)
-					Utils.log("mid " + isTrueWorld + " synchro reverse type " + r._class.toString());
-				r = r._next;
-				count1++;
-			}
-			r = w._firstEntity as RollbackableEntity;
-			while (r) {
-				if (!isTrueWorld != r.isTrueEntity)
-					Utils.log("mid" + !isTrueWorld + " synchro reverse type " + r._class.toString());
-				r = r._next;
-				count2++;
-			}
-			if (count1 != count2) {
-				Utils.log("mid sync failed!");
-			}
 			
 			//increment to next
 			w._syncPoint = w._syncPoint._next;
@@ -354,9 +280,6 @@ package net.flashpunk {
 				
 				//increment
 				w._syncPoint = w._syncPoint._next;
-				
-				//temp debug
-				addCount++;
 			}
 			
 			//update
@@ -365,37 +288,6 @@ package net.flashpunk {
 			//set sync points
 			_syncPoint = _lastEntity;
 			w._syncPoint = w._lastEntity;
-			
-			//temp debugging
-			count1 = 0;
-			count2 = 0;
-			r = _firstEntity as RollbackableEntity;
-			while (r) {
-				if (isTrueWorld != r.isTrueEntity)
-					Utils.log(isTrueWorld + " synchro reverse type " + r._class.toString());
-				r = r._next;
-				count1++;
-			}
-			r = w._firstEntity as RollbackableEntity;
-			while (r) {
-				if (!isTrueWorld != r.isTrueEntity)
-					Utils.log(!isTrueWorld + " synchro reverse type " + r._class.toString());
-				r = r._next;
-				count2++;
-			}
-			if (count1 != count2) {
-				_syncPoint = origSyncPoint;
-				w._syncPoint = wOrigSyncPoint;
-				Utils.log("post sync failed!");
-				Utils.log("only added " + addCount + "unrecycled !");
-				Utils.log(count1 + " vs " + count2);
-				Utils.log(isTrueWorld.toString());
-				Utils.log(toString());
-				Utils.log(w.isTrueWorld.toString());
-				Utils.log(w.toString());
-				_syncPoint = _lastEntity;
-				w._syncPoint = w._lastEntity;
-			}
 		}
 		
 		/**
@@ -404,11 +296,6 @@ package net.flashpunk {
 		 * @param	w	World to be rolled back to
 		 */
 		public function rollback(orig:Rollbackable):void {
-			//temp debug
-			if (isTrueWorld)
-				Utils.log("reverse rollback world");
-			checkEntityListForErrors("pre rollback");
-			
 			//declare vars
 			var w:RollbackableWorld = orig as RollbackableWorld;
 			var thisCurrentEntity:RollbackableEntity = _firstEntity;
@@ -416,13 +303,6 @@ package net.flashpunk {
 			
 			//loop through all entities to be rolled back to
 			while (oldCurrentEntity) {
-				//temp debug
-				if (!thisCurrentEntity) {
-					Utils.log("no current entity!");
-					Utils.log(toString());
-					Utils.log(w.toString());
-				}
-				
 				//rollback
 				if (oldCurrentEntity._world && !thisCurrentEntity._world) {
 					//unrecycle entity and rollback
@@ -436,14 +316,6 @@ package net.flashpunk {
 					thisCurrentEntity.rollback(oldCurrentEntity);
 				}
 				
-				//temp debug
-				if (thisCurrentEntity.isTrueEntity != isTrueWorld) {
-					Utils.log("rollback " + isTrueWorld + " world reverse type " + thisCurrentEntity._class.toString());
-				}
-				if (oldCurrentEntity.isTrueEntity == isTrueWorld) {
-					Utils.log("rollback " + !isTrueWorld + " world reverse type " + oldCurrentEntity._class.toString());
-				}
-				
 				//increment
 				thisCurrentEntity = thisCurrentEntity._next;
 				oldCurrentEntity = oldCurrentEntity._next;
@@ -452,27 +324,6 @@ package net.flashpunk {
 			//update lists
 			updateLists();
 			w.updateLists();
-			
-			//temp debug
-			var count1:int = 0;
-			var count2:int = 0;
-			var r:RollbackableEntity = _firstEntity as RollbackableEntity;
-			while (r) {
-				if (isTrueWorld != r.isTrueEntity)
-					Utils.log("post " + isTrueWorld + " rollback reverse type " + r._class.toString());
-				r = r._next;
-				count1++;
-			}
-			r = w._firstEntity as RollbackableEntity;
-			while (r) {
-				if (!isTrueWorld != r.isTrueEntity)
-					Utils.log("post " + !isTrueWorld + " rollback reverse type " + r._class.toString());
-				r = r._next;
-				count2++;
-			}
-			if (count1 != count2) {
-				Utils.log("rollback count wrong");
-			}
 		}
 		
 		/** @private Adds Entity to the master list. */
@@ -521,13 +372,6 @@ package net.flashpunk {
 					Utils.log(msg + " " + isTrueWorld + " reverse type " + r._class.toString());
 				r = r._next;
 			}
-		}
-		
-		/**
-		 * temp debug
-		 */
-		public function checkRecycleLists():void {
-			
 		}
 		
 		// Rollback information.

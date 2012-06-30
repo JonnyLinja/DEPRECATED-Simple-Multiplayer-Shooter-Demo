@@ -40,9 +40,9 @@ package rollback.engine {
 		 * Update also handles updateLists
 		 */
 		override public function update():void {
-			updateLists(); //temp debug
+			updateLists(); //update entities created by commands
 			super.update();
-			updateLists();
+			updateLists(); //update entities affected by collisions
 		}
 	}
 }

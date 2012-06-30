@@ -9,10 +9,6 @@ package entities {
 	
 	import general.Utils;
 	
-	//temp debug
-	import net.flashpunk.Entity;
-	import flash.geom.Point;
-	
 	public class Bullet extends SpriteMapEntity {
 		//sprite
 		[Embed(source = '../../images/airball.PNG')]
@@ -60,17 +56,6 @@ package entities {
 			//collide
 			if (collide(Person.COLLISION_TYPE, x, y))
 				shouldDie = true;
-			
-			//temp debug
-			checkCollide(COLLISION_TYPE, false, didCollideWithBullet);
-		}
-		
-		public function didCollideWithBullet(e:Entity, hitTestResult:int, intersectSize:Point):void {
-			var b:Bullet = e as Bullet;
-			if (b == this)
-				return;
-			if (centerX == b.centerX && centerY == b.centerY)
-				Utils.log("bullet stacking");
 		}
 		
 		override public function resolveShouldVariables():void {
@@ -79,9 +64,6 @@ package entities {
 			
 			if (shouldDie) {
 				var blood:Blood = world.create(Blood, true) as Blood;
-				//temp debug
-				//var blood:Blood = new Blood();
-				//world.add(blood);
 				blood.x = x + blood.halfWidth;
 				blood.y = y + blood.halfHeight;
 				
@@ -93,12 +75,6 @@ package entities {
 			//super
 			super.update();
 			
-			//temp debug
-			if (sprite_map.currentAnim != "spin")
-				Utils.log("omg y is it not spinning?");
-			if (!world)
-				Utils.log("null world but still updating?");
-			
 			//go!
 			x += accelX;
 			y += accelY;
@@ -106,10 +82,6 @@ package entities {
 			//kill if offscreen
 			if (x < 0 || y < 0 || x + width > FP.width || y + height > FP.height) {
 				world.recycle(this);
-				
-				//temp debugging
-				if (isTrueEntity)
-					Utils.log("recycled bullet");
 			}
 		}
 		
@@ -130,10 +102,6 @@ package entities {
 		override public function rollback(orig:Rollbackable):void {
 			//super
 			super.rollback(orig);
-			
-			//temp debug
-			//if (isTrueEntity)
-				//Utils.log("reverse rollback bullet");
 			
 			//cast
 			var b:Bullet = orig as Bullet;

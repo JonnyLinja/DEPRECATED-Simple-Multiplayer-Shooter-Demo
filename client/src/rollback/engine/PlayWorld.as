@@ -46,9 +46,6 @@ package rollback.engine {
 		private var isP1:Boolean; //eventually be able to handle more than 2 players, no longer boolean then
 		private var shouldRender:Boolean = true;
 		
-		//temp debug
-		private var trueMouse:Boolean = false;
-		
 		public function PlayWorld(isP1:Boolean, frameDelay:uint, frameMinSend:uint, conn:GameConnection) {
 			//set variables
 			this.isP1 = isP1;
@@ -216,10 +213,6 @@ package rollback.engine {
 		 * Updates true, perceived, and inputs
 		 */
 		override public function update():void {
-			//temp debug
-			trueWorld.checkEntityListForErrors("pre playworld update");
-			perceivedWorld.checkEntityListForErrors("pre playworld update");
-			
 			//super
 			super.update();
 			
@@ -231,16 +224,8 @@ package rollback.engine {
 			
 			//updates
 			updateTrueWorld();
-			trueWorld.checkEntityListForErrors("playworld after true update"); //temp debug
-			perceivedWorld.checkEntityListForErrors("playworld after true update"); //temp debug
 			updatePerceivedWorld();
-			trueWorld.checkEntityListForErrors("playworld after perc update"); //temp debug
-			perceivedWorld.checkEntityListForErrors("playworld after prec update"); //temp debug
 			updateInputsPrivate();
-			
-			//temp debug
-			trueWorld.checkEntityListForErrors("post playworld update");
-			perceivedWorld.checkEntityListForErrors("post playworld update");
 		}
 		
 		/**
@@ -287,12 +272,6 @@ package rollback.engine {
 						
 						//temp debugging
 						commandToCheck.executedFrame = trueFrame;
-						/*
-						if (commandToCheck.type == 5) {
-							trueMouse = !trueMouse;
-							Utils.log("true should be " + trueMouse);
-						}
-						*/
 						
 						//increment true command
 						trueCommand = commandToCheck;
@@ -304,14 +283,7 @@ package rollback.engine {
 				
 				//increment true frame
 				trueFrame++;
-				
-				//temp debug
-				Utils.log("true " + trueFrame);
 			}while (trueFrame <= leastFrame);
-			
-			//should rollback
-			//if (!shouldRollback) //temp debug - shoudln't need to do the following
-				//return;			//temp debug
 			
 			//rollback
 			perceivedWorld.synchronize(trueWorld);
@@ -319,7 +291,6 @@ package rollback.engine {
 			perceivedCommand = trueCommand;
 			
 			//loop update perceived
-			Utils.log("fast forward, from true " + trueFrame + " to " + perceivedFrame); //temp debug
 			for (var tempFrame:int = trueFrame; tempFrame < perceivedFrame; tempFrame++ ) {
 				//commands
 				if (firstCommand) {
@@ -347,9 +318,6 @@ package rollback.engine {
 				
 				//update perceived world
 				perceivedWorld.update();
-				
-				//temp debug
-				Utils.log("perceived fastforward " + ((int)(tempFrame+1)));
 			}
 		}
 		
@@ -402,9 +370,6 @@ package rollback.engine {
 				//increment perceived frame
 				perceivedFrame++;
 				
-				//temp debug
-				Utils.log("perceived " + perceivedFrame);
-				
 				//increment count
 				perceivedUpdateCount++;
 				
@@ -428,14 +393,11 @@ package rollback.engine {
 			var toSendFrame:Number = perceivedFrame + frameDelay;
 			
 			//blank commands
-			//temp debug
-			/*
 			if (!conn.hasOutgoing) {
 				if (conn.lastFrameSent + frameMinSend < toSendFrame) {
 					addMyCommandPrivate(new BlankCommand(isP1, toSendFrame, Input.mouseX, Input.mouseY));
 				}
 			}
-			*/
 			
 			//send message
 			conn.sendCommands();
@@ -446,11 +408,8 @@ package rollback.engine {
 		 */
 		override public function render():void {
 			if (shouldRender)
-				//perceivedWorld.render();
+				perceivedWorld.render();
 			shouldRender = false;
-			
-			//temp debug
-			trueWorld.render();
 		}
 		
 		/**
