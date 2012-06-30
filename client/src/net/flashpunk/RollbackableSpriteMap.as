@@ -11,12 +11,17 @@ package net.flashpunk {
 			//declare variables
 			var s:Spritemap = orig as Spritemap;
 			
+			//complete
+			complete = s.complete;
+			
+			//frame
+			frame = s.frame;
+			
 			//animation frame
 			if (s.currentAnim) {
 				play(s.currentAnim);
 				index = s.index;
-			}else
-				frame = s.frame;
+			}
 		}
 	}
 }

@@ -64,10 +64,10 @@ package entities {
 			
 			if (shouldDie) {
 				var blood:Blood = world.create(Blood, true) as Blood;
-				blood.x = x + blood.halfWidth;
-				blood.y = y + blood.halfHeight;
+				blood.x = x - blood.halfWidth;
+				blood.y = y - blood.halfHeight;
 				
-				//world.recycle(this);
+				world.recycle(this);
 			}
 		}
 		
@@ -80,9 +80,8 @@ package entities {
 			y += accelY;
 			
 			//kill if offscreen
-			if (x < 0 || y < 0 || x + width > FP.width || y + height > FP.height) {
+			if (x < 0 || y < 0 || x + width > FP.width || y + height > FP.height)
 				world.recycle(this);
-			}
 		}
 		
 		public function calculateVector(x:Number, y:Number):void {
@@ -97,6 +96,15 @@ package entities {
 			//apply ratio
 			accelX *= ratio;
 			accelY *= ratio;
+		}
+		
+		override public function added():void {
+			//super
+			super.added();
+			
+			//ugly hack to prevent it from hitting yourself
+			x += (accelX*4);
+			y += (accelY*4);
 		}
 		
 		override public function rollback(orig:Rollbackable):void {
