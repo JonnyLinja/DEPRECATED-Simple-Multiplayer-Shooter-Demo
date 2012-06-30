@@ -12,9 +12,6 @@ package rollback.engine {
 	import rollback.engine.GameWorld;
 	import rollback.networking.GameConnection;
 	
-	//temp debug
-	import general.Utils;
-	
 	public class PlayWorld extends World {
 		//worlds
 		private var perceivedWorld:GameWorld;
@@ -100,10 +97,6 @@ package rollback.engine {
 		 * @param	commandType
 		 */
 		protected function addMyCommand(commandType:int):void {
-			//temp debugging
-			if (perceivedUpdateCount <= 0)
-				Utils.log("adding my dupe command");
-			
 			addMyCommandPrivate(new BlankCommand(isP1, perceivedFrame + frameDelay, Input.mouseX, Input.mouseY));
 			addMyCommandPrivate(new Command(isP1, commandType, perceivedFrame + frameDelay, Input.mouseX, Input.mouseY));
 		}

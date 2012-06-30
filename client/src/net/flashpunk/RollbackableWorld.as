@@ -5,9 +5,6 @@ package net.flashpunk {
 	
 	import flash.utils.Dictionary;
 	
-	//temp debug
-	import general.Utils;
-	
 	public class RollbackableWorld extends World implements Rollbackable {
 		/**
 		 * Boolean indicating if world is true or perceived world
@@ -523,66 +520,6 @@ package net.flashpunk {
 				entity = entity._next;
 			}
 			return result;
-		}
-		
-		/**
-		 * temp debug
-		 */
-		public function checkEntityListForErrors(msg:String):void {
-			var r:RollbackableEntity = _firstEntity as RollbackableEntity;
-			while (r) {
-				if (isTrueWorld != r.isTrueEntity)
-					Utils.log(msg + " " + isTrueWorld + " reverse type " + r._class.toString());
-				r = r._next;
-			}
-		}
-		
-		/**
-		 * temp debug
-		 */
-		public function checkUpdateList():void {
-			if (!_updateFirst) {
-				Utils.log(isTrueWorld + " no head yet");
-				return;
-			}
-			
-			var r:RollbackableEntity = _updateFirst as RollbackableEntity;
-			var priority:int = r._updatePriority;
-			if (r._updatePrev)
-				Utils.log(isTrueWorld + " head has a previous");
-			var display:String = isTrueWorld + " update priority > (0 [" + priority + "]";
-			if (r._updateNext)
-				display += " " + (r._updateNext as RollbackableEntity)._updatePriority + ") ";
-			else
-				display += " 0) ";
-			if (!r.world)
-				Utils.log(isTrueWorld + " " + r._updatePriority + " entity null world");
-			r = r._updateNext as RollbackableEntity;
-			while (r) {
-				if (priority < r._updatePriority)
-					Utils.log(isTrueWorld + " priority out of whack");
-				
-				if (!r.world)
-					Utils.log(isTrueWorld + " " + r._updatePriority + " entity null world");
-				
-				if (r) {
-					display += "(";
-					if (r._updatePrev)
-						display += (r._updatePrev as RollbackableEntity)._updatePriority;
-					else
-						display += "0";
-					display += " [" + r._updatePriority + "]";
-					if (r._updateNext)
-						display += " " + (r._updateNext as RollbackableEntity)._updatePriority;
-					else
-						display += " 0";
-					display += ") ";
-				}
-				
-				priority = r._updatePriority;
-				r = r._updateNext as RollbackableEntity;
-			}
-			Utils.log(display);
 		}
 		
 		// Rollback information.

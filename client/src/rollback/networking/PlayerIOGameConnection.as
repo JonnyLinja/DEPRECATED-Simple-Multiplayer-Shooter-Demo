@@ -7,9 +7,6 @@ package rollback.networking {
 	
 	import net.flashpunk.utils.Input;
 	
-	//temp debug
-	import general.Utils;
-	
 	public class PlayerIOGameConnection extends GameConnection {
 		//playerio variables
 		private var conn:Connection;
@@ -42,10 +39,6 @@ package rollback.networking {
 				//message
 				m = conn.createMessage(MESSAGE_COMMANDS);
 				
-				//temp debug
-				if (c.frame == lastMyFrame)
-					Utils.log("SENDING DUPE MSG FRAME " + c.frame);
-				
 				//frame
 				m.add(c.frame-lastMyFrame);
 				lastMyFrame = c.frame;
@@ -77,10 +70,6 @@ package rollback.networking {
 			var cMouseX:int = m.getInt(1);
 			var cMouseY:int = m.getInt(2);
 			var c:int;
-			
-			//temp debug
-			if (m.getUInt(0) == 0)
-				Utils.log("RECEIVED DUPE MSG " + m.getUInt(0));
 			
 			//increment true max
 			lastEnemyFrame += m.getUInt(0);
