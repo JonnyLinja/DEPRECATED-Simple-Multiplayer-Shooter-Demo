@@ -19,68 +19,6 @@ package net.flashpunk {
 		}
 		
 		/**
-		 * Untested to see if it removes properly
-		 * Modified to remove all
-		 * Modified to destroy master list
-		 * Modified to destroy private recycled list
-		 */
-		override public function end():void {
-			//super
-			super.end();
-			
-			//remove
-			removeAll();
-			updateLists();
-			destroyRecycled();
-			destroyMasterList();
-		}
-		
-		/**
-		 * Meant to be called on ending the world. Destroys the entire Master list.
-		 * Does not use updateLists because there's no need to -> done at the end of World
-		 */
-		public function destroyMasterList():void {
-			//declare variables
-			var e:RollbackableEntity = _firstEntity as RollbackableEntity;
-			var n:RollbackableEntity = null;
-			
-			//loop destroy
-			while (e) {
-				n = e._next as RollbackableEntity;
-				e._next = null;
-				e._world = null;
-				e.removed();
-				e = n;
-			}
-		}
-		
-		/**
-		 * Clears stored recycled Entities of the Class type.
-		 * Done for the custom _recycled of RollbackableWorld
-		 * @param	classType		The Class type to clear.
-		 */
-		private function clearRecycled(classType:Class):void {
-			var e:RollbackableEntity = _recycled[classType],
-				n:RollbackableEntity;
-			while (e)
-			{
-				n = e._recycleNext as RollbackableEntity;
-				e._recyclePrev = null;
-				e._recycleNext = null;
-				e = n;
-			}
-			delete _recycled[classType];
-		}
-		
-		/**
-		 * Clears stored recycled Entities of all Class types.
-		 * Done for the custom _recycled of RollbackableWorld
-		 */
-		public function destroyRecycled():void {
-			for (var classType:Object in _recycled) clearRecycled(classType as Class);
-		}
-		
-		/**
 		 * Modified to set isTrueEntity
 		 * @param	e
 		 * @return
@@ -149,12 +87,9 @@ package net.flashpunk {
 			var e:RollbackableEntity;
 			
 			// remove entities
-			if (_remove.length)
-			{
-				for each (e in _remove)
-				{
-					if (!e._world)
-					{
+			if (_remove.length) {
+				for each (e in _remove) {
+					if (!e._world) {
 						if(_add.indexOf(e) >= 0)
 							_add.splice(_add.indexOf(e), 1);
 						
@@ -176,20 +111,16 @@ package net.flashpunk {
 			}
 			
 			// add entities
-			if (_add.length)
-			{
-				for each (e in _add)
-				{
+			if (_add.length) {
+				for each (e in _add) {
 					//add to master list
-					if (!e._created)
-					{
+					if (!e._created) {
 						e._created = true;
 						addToMasterList(e);
 					}
 					
 					//add brand new Entity to recycled list
-					if (e._world)
-					{
+					if (e._world) {
 						e._world = null;
 						e._recyclePrev = null;
 						e._recycleNext = null;
@@ -211,10 +142,8 @@ package net.flashpunk {
 			}
 			
 			// recycle entities
-			if (_recycle.length)
-			{
-				for each (e in _recycle)
-				{
+			if (_recycle.length) {
+				for each (e in _recycle) {
 					if (e._world || e._recycleNext || e._recyclePrev)
 						continue;
 					
@@ -227,11 +156,91 @@ package net.flashpunk {
 			}
 			
 			// sort the depth list
-			if (_layerSort)
-			{
+			if (_layerSort) {
 				if (_layerList.length > 1) FP.sort(_layerList, true);
 				_layerSort = false;
 			}
+		}
+		
+		/** @private Adds Entity to the master list. */
+		private function addToMasterList(e:RollbackableEntity):void {
+			// add to master list
+			if (_lastEntity) {
+				//not first entry into list
+				_lastEntity._next = e;
+				_lastEntity = e;
+			}else {
+				//first entry
+				_firstEntity = e;
+				_lastEntity = e;
+			}
+			
+			//cleanup
+			e._next = null;
+		}
+		
+		/**
+		 * Modified to ensure update order
+		 * @param	e
+		 */
+		override protected function addUpdate(e:Entity):void {
+			// add to update list
+			if (_updateFirst) {
+				_updateFirst._updatePrev = e;
+				e._updateNext = _updateFirst;
+			}
+			else e._updateNext = null;
+			e._updatePrev = null;
+			_updateFirst = e;
+			_count ++;
+			if (!_classCount[e._class]) _classCount[e._class] = 0;
+			_classCount[e._class] ++;
+		}
+		
+		/**
+		 * Modified to ensure update order
+		 * @param	e
+		 */
+		override protected function removeUpdate(e:Entity):void {
+			// remove from the update list
+			if (_updateFirst == e) _updateFirst = e._updateNext;
+			if (e._updateNext) e._updateNext._updatePrev = e._updatePrev;
+			if (e._updatePrev) e._updatePrev._updateNext = e._updateNext;
+			e._updateNext = e._updatePrev = null;
+			
+			_count --;
+			_classCount[e._class] --;
+		}
+		
+		/**
+		 * Modified to ensure type order
+		 * @param	e
+		 */
+		override internal function addType(e:Entity):void {
+			// add to type list
+			if (_typeFirst[e._type]) {
+				_typeFirst[e._type]._typePrev = e;
+				e._typeNext = _typeFirst[e._type];
+				_typeCount[e._type] ++;
+			}else {
+				e._typeNext = null;
+				_typeCount[e._type] = 1;
+			}
+			e._typePrev = null;
+			_typeFirst[e._type] = e;
+		}
+		
+		/**
+		 * Modified to ensure type order 
+		 * @param	e
+		 */
+		override internal function removeType(e:Entity):void {
+			// remove from the type list
+			if (_typeFirst[e._type] == e) _typeFirst[e._type] = e._typeNext;
+			if (e._typeNext) e._typeNext._typePrev = e._typePrev;
+			if (e._typePrev) e._typePrev._typeNext = e._typeNext;
+			e._typeNext = e._typePrev = null;
+			_typeCount[e._type] --;
 		}
 		
 		/**
@@ -310,21 +319,66 @@ package net.flashpunk {
 			w.updateLists();
 		}
 		
-		/** @private Adds Entity to the master list. */
-		private function addToMasterList(e:RollbackableEntity):void {
-			// add to master list
-			if (_lastEntity) {
-				//not first entry into list
-				_lastEntity._next = e;
-				_lastEntity = e;
-			}else {
-				//first entry
-				_firstEntity = e;
-				_lastEntity = e;
-			}
+		/**
+		 * Untested to see if it removes properly
+		 * Modified to remove all
+		 * Modified to destroy master list
+		 * Modified to destroy private recycled list
+		 */
+		override public function end():void {
+			//super
+			super.end();
 			
-			//cleanup
-			e._next = null;
+			//remove
+			removeAll();
+			updateLists();
+			destroyRecycled();
+			destroyMasterList();
+		}
+		
+		/**
+		 * Meant to be called on ending the world. Destroys the entire Master list.
+		 * Does not use updateLists because there's no need to -> done at the end of World
+		 */
+		public function destroyMasterList():void {
+			//declare variables
+			var e:RollbackableEntity = _firstEntity as RollbackableEntity;
+			var n:RollbackableEntity = null;
+			
+			//loop destroy
+			while (e) {
+				n = e._next as RollbackableEntity;
+				e._next = null;
+				e._world = null;
+				e.removed();
+				e = n;
+			}
+		}
+		
+		/**
+		 * Clears stored recycled Entities of the Class type.
+		 * Done for the custom _recycled of RollbackableWorld
+		 * @param	classType		The Class type to clear.
+		 */
+		private function clearRecycled(classType:Class):void {
+			var e:RollbackableEntity = _recycled[classType],
+				n:RollbackableEntity;
+			while (e)
+			{
+				n = e._recycleNext as RollbackableEntity;
+				e._recyclePrev = null;
+				e._recycleNext = null;
+				e = n;
+			}
+			delete _recycled[classType];
+		}
+		
+		/**
+		 * Clears stored recycled Entities of all Class types.
+		 * Done for the custom _recycled of RollbackableWorld
+		 */
+		public function destroyRecycled():void {
+			for (var classType:Object in _recycled) clearRecycled(classType as Class);
 		}
 		
 		/**
