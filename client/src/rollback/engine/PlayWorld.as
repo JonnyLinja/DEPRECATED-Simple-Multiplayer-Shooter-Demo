@@ -63,6 +63,10 @@ package rollback.engine {
 			trueWorld.begin();
 			perceivedWorld.begin();
 			
+			//update
+			trueWorld.updateLists();
+			perceivedWorld.updateLists();
+			
 			//sync point
 			trueWorld.beginSync();
 			perceivedWorld.beginSync();

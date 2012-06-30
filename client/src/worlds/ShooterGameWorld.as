@@ -28,9 +28,6 @@ package worlds {
 			//add entities
 			add(p1);
 			add(p2);
-			
-			//update
-			updateLists();
 		}
 		
 		override public function executeCommand(c:Command):void {
