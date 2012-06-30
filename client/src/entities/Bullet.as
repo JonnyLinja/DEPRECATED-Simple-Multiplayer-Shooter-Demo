@@ -26,9 +26,6 @@ package entities {
 		//collisions
 		private static const COLLISION_TYPE:String = "bullet";
 		
-		//should
-		private var shouldDie:Boolean = false;
-		
 		public function Bullet(x:Number=0, y:Number=0) {
 			//super
 			super(x, y, image, W, H);
@@ -41,39 +38,19 @@ package entities {
 			type = COLLISION_TYPE;
 		}
 		
-		override public function resetShouldVariables():void {
+		override public function update():void {
 			//super
-			super.resetShouldVariables();
+			super.update();
 			
-			//reset should
-			shouldDie = false;
-		}
-		
-		override public function determineShouldVariablesBasedOnCollision():void {
-			//super
-			super.determineShouldVariablesBasedOnCollision();
-			
-			//collide
-			if (collide(Person.COLLISION_TYPE, x, y))
-				shouldDie = true;
-		}
-		
-		override public function resolveShouldVariables():void {
-			//super
-			super.resolveShouldVariables();
-			
-			if (shouldDie) {
+			//collisions
+			if (collide(Person.COLLISION_TYPE, x, y)) {
 				var blood:Blood = world.create(Blood, true) as Blood;
 				blood.x = x - blood.halfWidth;
 				blood.y = y - blood.halfHeight;
 				
 				world.recycle(this);
 			}
-		}
-		
-		override public function update():void {
-			//super
-			super.update();
+
 			
 			//go!
 			x += accelX;

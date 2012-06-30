@@ -62,23 +62,6 @@ package entities {
 			}
 		}
 		
-		override public function resetShouldVariables():void {
-			//super
-			super.resetShouldVariables();
-		}
-		
-		override public function determineShouldVariablesBasedOnCollision():void {
-			//super
-			super.determineShouldVariablesBasedOnCollision();
-			
-			checkCollide(COLLISION_TYPE, true);
-		}
-		
-		override public function resolveShouldVariables():void {
-			//super
-			super.resolveShouldVariables();
-		}
-		
 		override public function update():void {
 			//super
 			super.update();
@@ -88,14 +71,19 @@ package entities {
 			clampVertical(0, FP.height);
 			
 			//movement
+			var moveX:Number = 0;
+			var moveY:Number = 0;
 			if (moveUp)
-				y -= speed;
+				moveY -= speed;
 			if (moveDown)
-				y += speed;
+				moveY += speed;
 			if (moveLeft)
-				x -= speed;
+				moveX -= speed;
 			if (moveRight)
-				x += speed;
+				moveX += speed;
+			
+			//move and prevent overlap
+			moveBy(moveX, moveY, COLLISION_TYPE, false);
 			
 			//face the mouse
 			switch(Utils.direction(centerX, centerY, mouseX, mouseY)) {

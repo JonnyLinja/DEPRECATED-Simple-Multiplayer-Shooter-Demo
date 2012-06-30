@@ -149,8 +149,8 @@ package rollback.engine {
 			if (current) {
 				//add to existing
 				
-				//search for position based on frames
-				while (c.frame < current.frame) {
+				//search for position based on frames with p1 before p2 - ensures order exactly the same
+				while (c.frame < current.frame || (c.player && c.frame == current.frame && c.player != current.player)) {
 					current = current.prev;
 					if (!current)
 						break;

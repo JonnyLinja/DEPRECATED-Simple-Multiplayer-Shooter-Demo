@@ -34,58 +34,8 @@ package net.flashpunk {
 		 */
 		public const HIT_RIGHT:int = 4;
 		
-		/**
-		 * How far the Entity should move along the X axis next update
-		 */
-		public var shouldMoveX:Number = 0;
-		
-		/**
-		 * How far the Entity should move along the Y axis next update
-		 */
-		public var shouldMoveY:Number = 0;
-		
 		public function RollbackableEntity(x:Number = 0, y:Number = 0) {
 			super(x, y);
-		}
-		
-		/**
-		 * Called before update.
-		 * Used for checks that don't affect position.
-		 * Calls resetShouldVariables.
-		 */
-		public function determineShouldVariablesBasedOnCollision():void {
-			resetShouldVariables();
-		}
-		
-		/**
-		 * Resets should variables.
-		 * Called at start of preUpdate.
-		 */
-		public function resetShouldVariables():void {
-			shouldMoveX = 0;
-			shouldMoveY = 0;
-		}
-		
-		/**
-		 * Updates the Entity.
-		 * Used for anything that does affect position.
-		 * Calls resolveShouldVariables.
-		 */
-		override public function update():void {
-			//super
-			super.update();
-			
-			//resolve
-			resolveShouldVariables();
-		}
-		
-		/**
-		 * Resolves should variables.
-		 * Called at start of update.
-		 */
-		public function resolveShouldVariables():void {
-			x += shouldMoveX;
-			y += shouldMoveY;
 		}
 		
 		/**
@@ -156,12 +106,12 @@ package net.flashpunk {
 				if (x < e.x) {
 					//left
 					if(preventOverlap)
-						shouldMoveX -= intersect.x;
+						x -= intersect.x;
 					return HIT_RIGHT;
 				}else {
 					//right
 					if(preventOverlap)
-						shouldMoveX += intersect.x;
+						x += intersect.x;
 					return HIT_LEFT;
 				}
 			}else {
@@ -169,12 +119,12 @@ package net.flashpunk {
 				if (y < e.y) {
 					//up
 					if(preventOverlap)
-						shouldMoveY -= intersect.y;
+						y -= intersect.y;
 					return HIT_BOTTOM;
 				}else {
 					//down
 					if(preventOverlap)
-						shouldMoveY += intersect.y;
+						y += intersect.y;
 					return HIT_TOP;
 				}
 			}
@@ -233,14 +183,15 @@ package net.flashpunk {
 		}
 		
 		/**
-		 * Debugging purposes
-		 * Temporary
+		 * temp debug
 		 * @return
 		 */
 		override public function toString():String {
 			return this.getClass() + "\t" + (this.world != null) + "\t" + x + ", " + y;
 		}
 		
+		/** @private */ internal var _updateOrder:int = 0; //to ensure that perceived and true worlds update entities in the same order
+		/** @private */ internal var _typeOrder:int = 0; //to ensure that perceived and true worlds check collisions in the same order
 		/** @private */ internal var _created:Boolean; //to determine if should add to the master list
 		/** @private */ internal var _next:RollbackableEntity; //master list
 		/** @private */ internal var _recyclePrev:RollbackableEntity; //doubly linked recycle

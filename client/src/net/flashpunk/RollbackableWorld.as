@@ -36,22 +36,6 @@ package net.flashpunk {
 		}
 		
 		/**
-		 * Modified to run preupdates first
-		 */
-		override public function update():void {
-			// preupdate checks
-			var e:RollbackableEntity = _updateFirst as RollbackableEntity;
-			while (e) {
-				if (e.active)
-					e.determineShouldVariablesBasedOnCollision();
-				e = e._updateNext as RollbackableEntity;
-			}
-			
-			//super
-			super.update();
-		}
-		
-		/**
 		 * Meant to be called on ending the world. Destroys the entire Master list.
 		 * Does not use updateLists because there's no need to -> done at the end of World
 		 */
@@ -345,7 +329,6 @@ package net.flashpunk {
 		
 		/**
 		 * temp debug
-		 * Temporary
 		 * @return
 		 */
 		public function toString():String {
