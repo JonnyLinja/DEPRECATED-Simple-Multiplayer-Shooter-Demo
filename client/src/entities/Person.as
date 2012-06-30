@@ -65,6 +65,8 @@ package entities {
 					Utils.log("person trying to create bullet for world " + (world as RollbackableWorld).isTrueWorld + " person " + isTrueEntity);
 				
 				var bullet:Bullet = world.create(Bullet, true) as Bullet;
+				//var bullet:Bullet = new Bullet(); //temp debug
+				//world.add(bullet); //temp debug
 				bullet.x = centerX - bullet.halfWidth;
 				bullet.y = centerY - bullet.halfHeight;
 				bullet.calculateVector(mouseX, mouseY);

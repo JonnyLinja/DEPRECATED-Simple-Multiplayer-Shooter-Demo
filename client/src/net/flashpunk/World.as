@@ -1190,10 +1190,10 @@
 		/** @private */	protected var _layerList:Array = [];								// changed to protected
 		/** @private */	private var _layerCount:Array = [];
 		/** @private */	protected var _layerSort:Boolean;									// changed to protected
-		/** @private */	protected var _classCount:Dictionary = new Dictionary;				// changed to protected
+		/** @private */	private var _classCount:Dictionary = new Dictionary;
 		/** @private */	internal var _typeFirst:Object = { };
 		/** @private */	private var _typeCount:Object = { };
-		/** @private */	protected static var _recycled:Dictionary = new Dictionary;			// changed to protected
+		/** @private */	private static var _recycled:Dictionary = new Dictionary;
 		/** @private */	internal var _entityNames:Dictionary = new Dictionary;
 	}
 }

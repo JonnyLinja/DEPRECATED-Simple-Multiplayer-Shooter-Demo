@@ -20,7 +20,8 @@ package general {
 		 */
 		public static function log(data:String):void {
 			try {
-				ExternalInterface.call("log", data);
+				//ExternalInterface.call("log", data);
+				trace(data);
 			}catch (e:*) {
 				trace(data);
 			}

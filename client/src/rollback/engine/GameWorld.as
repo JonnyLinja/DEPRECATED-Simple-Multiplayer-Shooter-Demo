@@ -36,8 +36,11 @@ package rollback.engine {
 		public function executeCommand(c:Command):void {
 		}
 		
+		/**
+		 * Update also handles updateLists
+		 */
 		override public function update():void {
-			updateLists();
+			updateLists(); //temp debug
 			super.update();
 			updateLists();
 		}

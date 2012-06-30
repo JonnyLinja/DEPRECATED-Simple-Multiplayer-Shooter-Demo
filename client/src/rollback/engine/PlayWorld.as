@@ -216,6 +216,10 @@ package rollback.engine {
 		 * Updates true, perceived, and inputs
 		 */
 		override public function update():void {
+			//temp debug
+			trueWorld.checkEntityListForErrors("pre playworld update");
+			perceivedWorld.checkEntityListForErrors("pre playworld update");
+			
 			//super
 			super.update();
 			
@@ -227,8 +231,16 @@ package rollback.engine {
 			
 			//updates
 			updateTrueWorld();
+			trueWorld.checkEntityListForErrors("playworld after true update"); //temp debug
+			perceivedWorld.checkEntityListForErrors("playworld after true update"); //temp debug
 			updatePerceivedWorld();
+			trueWorld.checkEntityListForErrors("playworld after perc update"); //temp debug
+			perceivedWorld.checkEntityListForErrors("playworld after prec update"); //temp debug
 			updateInputsPrivate();
+			
+			//temp debug
+			trueWorld.checkEntityListForErrors("post playworld update");
+			perceivedWorld.checkEntityListForErrors("post playworld update");
 		}
 		
 		/**

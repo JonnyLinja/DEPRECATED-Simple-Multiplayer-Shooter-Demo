@@ -79,6 +79,7 @@ package entities {
 			
 			if (shouldDie) {
 				var blood:Blood = world.create(Blood, true) as Blood;
+				//temp debug
 				//var blood:Blood = new Blood();
 				//world.add(blood);
 				blood.x = x + blood.halfWidth;
