@@ -3,15 +3,16 @@ SIMPLE MULTIPLAYER SHOOTER
 
 Sample code showing use of MultiPunk.
 
+
 SETUP
 =====
 
-##### SERVER
+#### > SERVER
 
 * Follow PlayerIO instructions to make a game (http://playerio.com/documentation/gettingstarted/flashcombopackage)
 * Use the Game.cs (bounce server code) provided in the Simple Multiplayer Shooter
 
-##### CLIENT
+#### > CLIENT
 
 * Set the GAME_ID variable in PlayerIOQuickStartWorld to the ID of the game you made at PlayerIO
 
