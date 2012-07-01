@@ -7,6 +7,10 @@ Sample code showing use of MultiPunk.
 SETUP
 =====
 
+#### > DOWNLOAD
+
+* https://github.com/SelfPossessed/Simple-Multiplayer-Shooter/downloads is a zip containing the project files and images
+
 #### > SERVER
 
 * Follow PlayerIO instructions to make a game (http://playerio.com/documentation/gettingstarted/flashcombopackage)
