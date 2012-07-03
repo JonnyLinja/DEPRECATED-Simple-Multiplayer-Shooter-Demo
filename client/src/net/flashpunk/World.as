@@ -1003,7 +1003,7 @@
 		}
 		
 		/** @private Adds Entity to the update list. */
-		protected function addUpdate(e:Entity):void // changed to protected
+		internal function addUpdate(e:Entity):void // changed to internal
 		{
 			// add to update list
 			if (_updateFirst)
@@ -1020,7 +1020,7 @@
 		}
 		
 		/** @private Removes Entity from the update list. */
-		protected function removeUpdate(e:Entity):void // changed to protected
+		internal function removeUpdate(e:Entity):void // changed to internal
 		{
 			// remove from the update list
 			if (_updateFirst == e) _updateFirst = e._updateNext;
@@ -1176,23 +1176,23 @@
 		}
 		
 		// Adding and removal.
-		/** @private */	protected var _add:Vector.<Entity> = new Vector.<Entity>;			// changed to protected
-		/** @private */	protected var _remove:Vector.<Entity> = new Vector.<Entity>;		// changed to protected
-		/** @private */	protected var _recycle:Vector.<Entity> = new Vector.<Entity>;		// changed to protected
+		/** @private */	internal var _add:Vector.<Entity> = new Vector.<Entity>;			// changed to internal
+		/** @private */	internal var _remove:Vector.<Entity> = new Vector.<Entity>;			// changed to internal
+		/** @private */	internal var _recycle:Vector.<Entity> = new Vector.<Entity>;		// changed to internal
 		
 		// Update information.
-		/** @private */	protected var _updateFirst:Entity;									// changed to protected
-		/** @private */	protected var _count:uint;											// changed to protected
+		/** @private */	internal var _updateFirst:Entity;									// changed to internal
+		/** @private */	internal var _count:uint;											// changed to internal
 		
 		// Render information.
 		/** @private */	private var _renderFirst:Array = [];
 		/** @private */	private var _renderLast:Array = [];
-		/** @private */	protected var _layerList:Array = [];								// changed to protected
+		/** @private */	internal var _layerList:Array = [];									// changed to internal
 		/** @private */	private var _layerCount:Array = [];
-		/** @private */	protected var _layerSort:Boolean;									// changed to protected
-		/** @private */	protected var _classCount:Dictionary = new Dictionary;				// changed to protected
+		/** @private */	internal var _layerSort:Boolean;									// changed to internal
+		/** @private */	internal var _classCount:Dictionary = new Dictionary;				// changed to internal
 		/** @private */	internal var _typeFirst:Object = { };
-		/** @private */	protected var _typeCount:Object = { };								// changed to protected
+		/** @private */	internal var _typeCount:Object = { };								// changed to internal
 		/** @private */	private static var _recycled:Dictionary = new Dictionary;
 		/** @private */	internal var _entityNames:Dictionary = new Dictionary;
 	}

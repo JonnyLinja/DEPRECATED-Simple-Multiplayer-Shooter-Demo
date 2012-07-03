@@ -196,7 +196,7 @@ package net.flashpunk {
 		 * Modified to ensure update order
 		 * @param	e
 		 */
-		override protected function addUpdate(e:Entity):void {
+		override internal function addUpdate(e:Entity):void {
 			//cast
 			var r:RollbackableEntity = e as RollbackableEntity;
 			
@@ -271,7 +271,7 @@ package net.flashpunk {
 		 * Modified to ensure update order
 		 * @param	e
 		 */
-		override protected function removeUpdate(e:Entity):void {
+		override internal function removeUpdate(e:Entity):void {
 			//reset priority
 			var r:RollbackableEntity = e as RollbackableEntity;
 			r._updatePriority = 0;
