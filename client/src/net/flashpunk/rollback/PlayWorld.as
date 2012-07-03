@@ -26,8 +26,6 @@ package net.flashpunk.rollback {
 		//frames
 		private var frameDelay:uint = 3; //how many frames to delay inputs by - has to be at least 1!
 		private var frameMinSend:uint = 10; //tries sends mouse position - was set to 10!
-		private var trueFrame:uint = 0; //current frame of true - can eventually be GameWorld variable
-		private var perceivedFrame:uint = 0; //current frame of perceived - can eventually be GameWorld varaible
 		
 		//time
 		private var currentTime:uint = 0;
@@ -97,8 +95,7 @@ package net.flashpunk.rollback {
 		 * @param	commandType
 		 */
 		protected function addMyCommand(commandType:int):void {
-			addMyCommandPrivate(new BlankCommand(isP1, perceivedFrame + frameDelay, Input.mouseX, Input.mouseY));
-			addMyCommandPrivate(new Command(isP1, commandType, perceivedFrame + frameDelay, Input.mouseX, Input.mouseY));
+			addMyCommandPrivate(new Command(isP1, commandType, perceivedWorld.frame + frameDelay, Input.mouseX, Input.mouseY));
 		}
 		
 		/**
@@ -107,7 +104,7 @@ package net.flashpunk.rollback {
 		 */
 		public function displayCommands():String {
 			var result:String = "====================FRAMES====================\n";
-			result += "true: " + trueFrame + "\nperceived:" + perceivedFrame + "\n";
+			result += "true: " + trueWorld.frame + "\nperceived:" + perceivedWorld.frame + "\n";
 			
 			result += "====================COMMANDS====================\n";
 			result += "frame\t\texe frametype\tplayer\tx\ty\n"
@@ -231,10 +228,10 @@ package net.flashpunk.rollback {
 		 */
 		private function updateTrueWorld():void {
 			//determine frame to loop to
-			var leastFrame:Number = Math.min(conn.lastFrameReceived, perceivedFrame-1); //eventually update this to accept multiple players
+			var leastFrame:Number = Math.min(conn.lastFrameReceived, perceivedWorld.frame-1); //eventually update this to accept multiple players
 			
 			//synchronize
-			if(trueFrame <= leastFrame)
+			if(trueWorld.frame <= leastFrame)
 				trueWorld.synchronize(perceivedWorld);
 			else
 				return;
@@ -258,7 +255,7 @@ package net.flashpunk.rollback {
 							commandToCheck = trueCommand.next;
 						
 						//should execute command check
-						if (!commandToCheck || commandToCheck.frame != trueFrame)
+						if (!commandToCheck || commandToCheck.frame != trueWorld.frame)
 							break;
 						
 						//should rollback
@@ -268,7 +265,7 @@ package net.flashpunk.rollback {
 						trueWorld.executeCommand(commandToCheck);
 						
 						//temp debugging
-						commandToCheck.executedFrame = trueFrame;
+						commandToCheck.executedFrame = trueWorld.frame;
 						
 						//increment true command
 						trueCommand = commandToCheck;
@@ -277,10 +274,10 @@ package net.flashpunk.rollback {
 				
 				//update true world
 				trueWorld.update();
-				
-				//increment true frame
-				trueFrame++;
-			}while (trueFrame <= leastFrame);
+			}while (trueWorld.frame <= leastFrame);
+			
+			//save frame
+			var currentFrame:uint = perceivedWorld.frame;
 			
 			//rollback
 			perceivedWorld.synchronize(trueWorld);
@@ -288,7 +285,7 @@ package net.flashpunk.rollback {
 			perceivedCommand = trueCommand;
 			
 			//loop update perceived
-			for (var tempFrame:int = trueFrame; tempFrame < perceivedFrame; tempFrame++ ) {
+			while(perceivedWorld.frame < currentFrame) {
 				//commands
 				if (firstCommand) {
 					//at least 1 command!, loop through them
@@ -302,7 +299,7 @@ package net.flashpunk.rollback {
 							commandToCheck = perceivedCommand.next;
 						
 						//should execute command check
-						if (!commandToCheck || commandToCheck.frame != tempFrame)
+						if (!commandToCheck || commandToCheck.frame != perceivedWorld.frame)
 							break;
 						
 						//execute command
@@ -350,7 +347,7 @@ package net.flashpunk.rollback {
 							commandToCheck = perceivedCommand.next;
 						
 						//should execute command check
-						if (!commandToCheck || commandToCheck.frame != perceivedFrame)
+						if (!commandToCheck || commandToCheck.frame != perceivedWorld.frame)
 							break;
 						
 						//execute command
@@ -363,9 +360,6 @@ package net.flashpunk.rollback {
 				
 				//update perceived world
 				perceivedWorld.update();
-				
-				//increment perceived frame
-				perceivedFrame++;
 				
 				//increment count
 				perceivedUpdateCount++;
@@ -387,7 +381,7 @@ package net.flashpunk.rollback {
 			//template power
 			updateInputs();
 			
-			var toSendFrame:Number = perceivedFrame + frameDelay;
+			var toSendFrame:Number = perceivedWorld.frame + frameDelay;
 			
 			//blank commands
 			if (!conn.hasOutgoing) {

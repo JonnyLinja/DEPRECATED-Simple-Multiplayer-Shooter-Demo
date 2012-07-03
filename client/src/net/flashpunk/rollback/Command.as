@@ -2,7 +2,7 @@ package net.flashpunk.rollback {
 	public class Command {
 		//vars
 		public var player:Boolean;
-		protected var _type:int;
+		internal var _type:int;
 		public var frame:uint;
 		public var x:Number;
 		public var y:Number;
