@@ -1,4 +1,4 @@
-package rollback.engine {
+package net.flashpunk.rollback {
 	import flash.geom.Point;
 	import flash.utils.getTimer;
 	
@@ -7,15 +7,15 @@ package rollback.engine {
 	import net.flashpunk.utils.Input;
 	import net.flashpunk.utils.Key;
 	
-	import rollback.commands.Command;
-	import rollback.commands.BlankCommand;
-	import rollback.engine.GameWorld;
-	import rollback.networking.GameConnection;
+	import net.flashpunk.rollback.Command;
+	import net.flashpunk.rollback.BlankCommand;
+	import net.flashpunk.rollback.GameWorld;
+	import net.flashpunk.rollback.GameConnection;
 	
 	public class PlayWorld extends World {
 		//worlds
 		private var perceivedWorld:GameWorld;
-		protected var trueWorld:GameWorld; //temp protected
+		protected var trueWorld:GameWorld; //temp debug
 		
 		//command datastructure
 		private var firstCommand:Command; //first in linked list

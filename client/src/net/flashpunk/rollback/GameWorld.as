@@ -1,5 +1,5 @@
-package rollback.engine {
-	import rollback.commands.Command;	
+package net.flashpunk.rollback {
+	import net.flashpunk.rollback.Command;	
 	import net.flashpunk.RollbackableWorld;
 	
 	public class GameWorld extends RollbackableWorld {

@@ -1,5 +1,5 @@
-package rollback.networking {
-	import rollback.commands.Command;
+package net.flashpunk.rollback {
+	import net.flashpunk.rollback.Command;
 	
 	public class GameConnection {
 		public var callback:Function;

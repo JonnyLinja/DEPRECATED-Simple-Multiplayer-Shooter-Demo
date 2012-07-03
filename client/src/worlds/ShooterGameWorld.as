@@ -1,9 +1,9 @@
 package worlds {
-	import rollback.engine.GameWorld;
+	import net.flashpunk.rollback.GameWorld;
 	
 	import net.flashpunk.FP;
 	
-	import rollback.commands.Command;
+	import net.flashpunk.rollback.Command;
 	
 	import entities.Person;
 	import entities.Alien;

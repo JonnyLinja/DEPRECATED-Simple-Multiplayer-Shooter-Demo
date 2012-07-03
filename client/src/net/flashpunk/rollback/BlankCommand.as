@@ -1,4 +1,4 @@
-package rollback.commands {
+package net.flashpunk.rollback {
 	public class BlankCommand extends Command {
 		public function BlankCommand(player:Boolean, frame:uint, x:Number, y:Number) {
 			//super

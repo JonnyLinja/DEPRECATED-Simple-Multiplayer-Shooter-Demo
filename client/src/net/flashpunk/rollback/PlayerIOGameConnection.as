@@ -1,9 +1,9 @@
-package rollback.networking {
+package net.flashpunk.rollback {
 	import playerio.Connection;
 	import playerio.Message;
-	import rollback.commands.BlankCommand;
 	
-	import rollback.commands.Command;
+	import net.flashpunk.rollback.BlankCommand;
+	import net.flashpunk.rollback.Command;
 	
 	import net.flashpunk.utils.Input;
 	

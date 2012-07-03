@@ -1,4 +1,4 @@
-package rollback.commands {
+package net.flashpunk.rollback {
 	public class Command {
 		//vars
 		public var player:Boolean;
@@ -11,8 +11,8 @@ package rollback.commands {
 		public var executedFrame:uint;
 		
 		//linked list
-		public var next:Command=null;
-		public var prev:Command=null;
+		internal var next:Command=null;
+		internal var prev:Command = null;
 		
 		public function Command(player:Boolean, command:int, frame:uint, x:Number=0, y:Number=0) {
 			//check valid

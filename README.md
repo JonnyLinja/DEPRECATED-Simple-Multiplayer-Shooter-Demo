@@ -23,5 +23,5 @@ SETUP
 CODE
 ====
 
-* Look at the code in the "worlds", "entities", and general folders. That's all you have to do to make this game. The rest is the engine.
+* Look at the code in the "worlds", "entities", and "general" folders. That's all you have to do to make this game. The rest is the engine.
 * https://github.com/SelfPossessed/FlashPunk has more documentation

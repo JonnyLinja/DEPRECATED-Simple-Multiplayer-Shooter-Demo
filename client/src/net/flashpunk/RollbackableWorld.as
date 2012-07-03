@@ -2,6 +2,8 @@ package net.flashpunk {
 	import net.flashpunk.World;
 	import net.flashpunk.Entity;
 	import net.flashpunk.FP;
+	import net.flashpunk.Rollbackable;
+	import net.flashpunk.RollbackableEntity;
 	
 	import flash.utils.Dictionary;
 	
