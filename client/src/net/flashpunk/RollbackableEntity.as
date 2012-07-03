@@ -2,6 +2,7 @@ package net.flashpunk {
 	import flash.geom.Point;
 	
 	import net.flashpunk.Entity;
+	import net.flashpunk.RollbackableSfx;
 	
 	public class RollbackableEntity extends Entity implements Rollbackable {
 		/**
@@ -161,6 +162,34 @@ package net.flashpunk {
 		}
 		
 		/**
+		 * Adds sounds to be played/rolled back as needed
+		 * @param	s
+		 */
+		public function addSound(s:RollbackableSfx):void {
+			//connect
+			if (_firstSfx)
+				s.next = _firstSfx;
+			
+			//set it as head
+			_firstSfx = s;
+		}
+		
+		override public function render():void {
+			//super
+			super.render();
+			
+			//sounds
+			var current:RollbackableSfx = _firstSfx;
+			while (current) {
+				//play
+				current.render();
+				
+				//increment
+				current = current.next;
+			}
+		}
+		
+		/**
 		 * Rolls back primitive values of current Entity to oldEntity
 		 * @param	oldEntity	entity to be rolled back to
 		 */
@@ -184,6 +213,18 @@ package net.flashpunk {
 			
 			//type
 			type = e.type;
+			
+			//sounds
+			var current:RollbackableSfx = _firstSfx;
+			var eCurrent:RollbackableSfx = e._firstSfx;
+			while (current) {
+				//rollback
+				current.rollback(eCurrent);
+				
+				//increment
+				current = current.next;
+				eCurrent = eCurrent.next;
+			}
 		}
 		
 		/**
@@ -194,6 +235,7 @@ package net.flashpunk {
 			return this.getClass() + "\t" + (this.world != null) + "\t" + x + ", " + y;
 		}
 		
+		/** @private */ private var _firstSfx:RollbackableSfx = null;
 		/** @private */ internal var _updatePriority:int = 0; //to ensure that perceived and true worlds update entities in the same order
 		/** @private */ internal var _typePriority:int = 0; //to ensure that perceived and true worlds check collisions in the same order
 		/** @private */ internal var _created:Boolean; //to determine if should add to the master list
