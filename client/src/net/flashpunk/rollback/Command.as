@@ -1,11 +1,11 @@
 package net.flashpunk.rollback {
 	public class Command {
 		//vars
-		public var player:Boolean;
+		private var _player:Boolean;
 		internal var _type:int;
-		public var frame:uint;
-		public var x:Number;
-		public var y:Number;
+		private var _frame:uint;
+		private var _x:Number;
+		private var _y:Number;
 		
 		//temp debugging
 		public var executedFrame:uint;
@@ -19,11 +19,11 @@ package net.flashpunk.rollback {
 			validateType(command);
 			
 			//save values
-			this.player = player;
+			_player = player;
 			_type = command;
-			this.frame = frame;
-			this.x = x;
-			this.y = y;
+			_frame = frame;
+			_x = x;
+			_y = y;
 		}
 		
 		private function validateType(type:int):void {
@@ -42,6 +42,22 @@ package net.flashpunk.rollback {
 			
 			//save it
 			_type = type;
+		}
+		
+		public function get player():Boolean {
+			return _player;
+		}
+		
+		public function get frame():uint {
+			return _frame;
+		}
+		
+		public function get x():Number {
+			return _x;
+		}
+		
+		public function get y():Number {
+			return _y;
 		}
 	}
 }
