@@ -1,5 +1,6 @@
 package entities {
 	import net.flashpunk.Rollbackable;
+	import net.flashpunk.RollbackableSfx;
 	
 	import entities.SpriteMapEntity;
 	
@@ -7,6 +8,11 @@ package entities {
 		//sprite
 		[Embed(source = '../../images/blood.PNG')]
 		private static const image:Class;
+		
+		//sounds
+		[Embed(source = '../../sounds/BoulderDeath.mp3')]
+		private const BOOM:Class;
+		private var boom:RollbackableSfx = new RollbackableSfx(BOOM);
 		
 		//size
 		private const W:uint = 79;
@@ -18,6 +24,9 @@ package entities {
 			
 			//animations
 			sprite_map.add("animate", [0, 1, 2], 10, false);
+			
+			//sounds
+			addSound(boom);
 		}
 		
 		override public function update():void {
@@ -35,6 +44,7 @@ package entities {
 			
 			//play
 			sprite_map.play("animate", true, 0);
+			boom.play();
 		}
 	}
 }

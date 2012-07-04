@@ -36,14 +36,6 @@ package net.flashpunk.rollback {
 			return _type;
 		}
 		
-		public function set type(type:int):void {
-			//check valid
-			validateType(type);
-			
-			//save it
-			_type = type;
-		}
-		
 		public function get player():Boolean {
 			return _player;
 		}

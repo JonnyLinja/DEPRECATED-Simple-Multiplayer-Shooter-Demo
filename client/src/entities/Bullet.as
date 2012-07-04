@@ -2,6 +2,7 @@ package entities {
 	import net.flashpunk.RollbackableSpriteMap;
 	import net.flashpunk.Rollbackable;
 	import net.flashpunk.FP;
+	import net.flashpunk.RollbackableSfx;
 	
 	import entities.SpriteMapEntity;
 	import entities.Person;
@@ -13,6 +14,11 @@ package entities {
 		//sprite
 		[Embed(source = '../../images/airball.PNG')]
 		private static const image:Class;
+		
+		//sounds
+		[Embed(source = '../../sounds/Airball.mp3')]
+		private const SHOOT:Class;
+		private var shoot:RollbackableSfx = new RollbackableSfx(SHOOT);
 		
 		//size
 		private const W:uint = 14;
@@ -36,6 +42,9 @@ package entities {
 			
 			//collision type
 			type = COLLISION_TYPE;
+			
+			//sounds
+			addSound(shoot);
 		}
 		
 		override public function update():void {
@@ -81,7 +90,10 @@ package entities {
 			
 			//ugly hack to prevent it from hitting yourself
 			x += (accelX*4);
-			y += (accelY*4);
+			y += (accelY * 4);
+			
+			//sound
+			shoot.play();
 		}
 		
 		override public function rollback(orig:Rollbackable):void {

@@ -6,7 +6,6 @@ package net.flashpunk.rollback {
 	public class GameWorld extends RollbackableWorld {
 		private var _frameRate:uint;
 		private var _frameElapsed:Number;
-		private var _frame:uint = 0;
 		
 		public function GameWorld(frameRate:uint) {
 			//super
@@ -32,13 +31,6 @@ package net.flashpunk.rollback {
 		}
 		
 		/**
-		 * Getter
-		 */
-		public function get frame():uint {
-			return _frame;
-		}
-		
-		/**
 		 * Children should override
 		 * @param	c
 		 */
@@ -57,20 +49,6 @@ package net.flashpunk.rollback {
 			
 			//update entities affected by collisions
 			updateLists();
-			
-			//increment
-			_frame++;
-		}
-		
-		override public function rollback(orig:Rollbackable):void {
-			//super
-			super.rollback(orig);
-			
-			//cast
-			var g:GameWorld = orig as GameWorld;
-			
-			//frames
-			_frame = g._frame;
 		}
 	}
 }

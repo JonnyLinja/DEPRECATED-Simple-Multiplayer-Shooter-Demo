@@ -3,6 +3,13 @@ package net.flashpunk {
 	
 	import net.flashpunk.Entity;
 	import net.flashpunk.RollbackableSfx;
+	import net.flashpunk.RollbackableWorld;
+	
+	//ugly, shouldn't be tied to gameworld
+	//would mean that framerate would have to be moved to rollbackableworld though
+	//internal wouldn't work anymore for the framerate variable and protected exposes it to subclasses
+	//probably have to namespace it
+	import net.flashpunk.rollback.GameWorld;
 	
 	public class RollbackableEntity extends Entity implements Rollbackable {
 		/**
@@ -172,17 +179,28 @@ package net.flashpunk {
 			
 			//set it as head
 			_firstSfx = s;
+			
+			//set frame getter
+			s.getStartFrame = getFrame;
+		}
+		
+		//frame getter
+		private function getFrame():Number {
+			return (world as RollbackableWorld).frame;
 		}
 		
 		override public function render():void {
 			//super
 			super.render();
 			
+			//deciare variables
+			var w:GameWorld = world as GameWorld; //ugly hack
+			
 			//sounds
 			var current:RollbackableSfx = _firstSfx;
 			while (current) {
-				//play
-				current.render();
+				//play, note frame-1 is to offset frame increment in update
+				current.render(w.frame-1, w.frameRate);
 				
 				//increment
 				current = current.next;
@@ -217,7 +235,7 @@ package net.flashpunk {
 			//sounds
 			var current:RollbackableSfx = _firstSfx;
 			var eCurrent:RollbackableSfx = e._firstSfx;
-			while (current) {
+			while (current && eCurrent) {
 				//rollback
 				current.rollback(eCurrent);
 				

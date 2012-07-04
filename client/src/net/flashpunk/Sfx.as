@@ -40,7 +40,7 @@
 		 * @param	vol		Volume factor, a value from 0 to 1.
 		 * @param	pan		Panning factor, a value from -1 to 1.
 		 */
-		public function play(vol:Number = 1, pan:Number = 0):void
+		public function play(vol:Number = 1, pan:Number = 0, pos:Number = 0):void
 		{
 			if (_channel) stop();
 			_pan = FP.clamp(pan, -1, 1);
@@ -49,7 +49,7 @@
 			_filteredVol = Math.max(0, _vol * getVolume(_type));
 			_transform.pan = _filteredPan;
 			_transform.volume = _filteredVol;
-			_channel = _sound.play(0, 0, _transform);
+			_channel = _sound.play(pos, 0, _transform);
 			if (_channel)
 			{
 				addPlaying();
@@ -64,9 +64,9 @@
 		 * @param	vol		Volume factor, a value from 0 to 1.
 		 * @param	pan		Panning factor, a value from -1 to 1.
 		 */
-		public function loop(vol:Number = 1, pan:Number = 0):void
+		public function loop(vol:Number = 1, pan:Number = 0, pos:Number = 0):void
 		{
-			play(vol, pan);
+			play(vol, pan, pos);
 			_looping = true;
 		}
 		
@@ -100,7 +100,7 @@
 		}
 		
 		/** @private Event handler for sound completion. */
-		private function onComplete(e:Event = null):void
+		internal function onComplete(e:Event = null):void // changed to internal
 		{
 			if (_looping) loop(_vol, _pan);
 			else stop();
