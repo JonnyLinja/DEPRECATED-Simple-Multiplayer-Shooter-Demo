@@ -20,6 +20,11 @@ SETUP
 
 * Set the GAME_ID variable in PlayerIOQuickStartWorld to the ID of the game you made at PlayerIO
 
+SERVER
+======
+
+The server is a simple bounce server. It takes the first two people who join and matches them into a game.
+
 CODE
 ====
 

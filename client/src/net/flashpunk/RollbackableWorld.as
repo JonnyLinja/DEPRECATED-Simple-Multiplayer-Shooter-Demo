@@ -1,27 +1,56 @@
 package net.flashpunk {
+	import flash.utils.Dictionary;
+	
 	import net.flashpunk.World;
 	import net.flashpunk.Entity;
 	import net.flashpunk.FP;
 	import net.flashpunk.Rollbackable;
 	import net.flashpunk.RollbackableEntity;
+	import net.flashpunk.namespace.RollbackNamespace;
 	
-	import flash.utils.Dictionary;
+	use namespace RollbackNamespace;
 	
 	public class RollbackableWorld extends World implements Rollbackable {
 		/**
 		 * Boolean indicating if world is true or perceived world
 		 */
-		public var isTrueWorld:Boolean = false;
+		RollbackNamespace var _isTrueWorld:Boolean = false;
 		
-		public function RollbackableWorld() {
+		public function RollbackableWorld(frameRate:uint) {
+			//super
+			super();
 			
+			//save frame rate
+			_frameRate = frameRate;
+			_frameElapsed = frameRate * .001;
 		}
 		
 		/**
 		 * Getter
 		 */
-		public function get frame():uint {
+		public function get frame():int {
 			return _frame;
+		}
+		
+		/**
+		 * Getter
+		 */
+		public function get frameRate():uint {
+			return _frameRate;
+		}
+		
+		/**
+		 * Getter
+		 */
+		public function get frameElapsed():Number {
+			return _frameElapsed;
+		}
+		
+		/**
+		 * Getter
+		 */
+		public function get isTrueWorld():Boolean  {
+			return _isTrueWorld;
 		}
 		
 		/**
@@ -34,7 +63,7 @@ package net.flashpunk {
 			var r:RollbackableEntity = e as RollbackableEntity;
 			
 			//set is true
-			r.isTrueEntity = isTrueWorld;
+			r._isTrueEntity = _isTrueWorld;
 			
 			//super
 			return super.add(r);
@@ -54,7 +83,7 @@ package net.flashpunk {
 				e._recycleNext = null;
 			}
 			else e = new classType;
-			e.isTrueEntity = isTrueWorld;
+			e._isTrueEntity = _isTrueWorld;
 			
 			// return
 			if (addToWorld) return add(e);
@@ -87,8 +116,10 @@ package net.flashpunk {
 		}
 		
 		override public function update():void {
-			//super
-			super.update();
+			if(_frame >= 0) {
+				//super
+				super.update();
+			}
 			
 			//increment
 			_frame++;
@@ -540,7 +571,9 @@ package net.flashpunk {
 		}
 		
 		//Frame information
-		/** @private */ private var _frame:uint = 0;
+		/** @private */ RollbackNamespace var _frame:int = 0;
+		/** @private */ private var _frameRate:uint = 0;
+		/** @private */ private var _frameElapsed:Number = 0;
 		
 		// Rollback information
 		/** @private */ private var _isRollingBack:Boolean = false;

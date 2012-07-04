@@ -6,11 +6,13 @@ package net.flashpunk.rollback {
 	import net.flashpunk.FP;
 	import net.flashpunk.utils.Input;
 	import net.flashpunk.utils.Key;
-	
 	import net.flashpunk.rollback.Command;
 	import net.flashpunk.rollback.BlankCommand;
 	import net.flashpunk.rollback.GameWorld;
 	import net.flashpunk.rollback.GameConnection;
+	import net.flashpunk.namespace.RollbackNamespace;
+	
+	use namespace RollbackNamespace;
 	
 	public class PlayWorld extends World {
 		//worlds
@@ -31,9 +33,6 @@ package net.flashpunk.rollback {
 		private var currentTime:uint = 0;
 		private var nextFrameTime:uint = 0; //for perceived
 		
-		//game loop
-		private var perceivedUpdateCount:int; //number of times perceived was updated during this frame
-		
 		//connection
 		private var conn:GameConnection;
 		
@@ -52,7 +51,10 @@ package net.flashpunk.rollback {
 			//factory worlds
 			perceivedWorld = createGameWorld();
 			trueWorld = createGameWorld();
-			trueWorld.isTrueWorld = true;
+			
+			//modify worlds
+			perceivedWorld._frame -= this.frameDelay; //cause game to start late
+			trueWorld._isTrueWorld = true; //helper
 			
 			//game worlds
 			trueWorld.begin();
@@ -227,6 +229,10 @@ package net.flashpunk.rollback {
 		 * If able, performs rollback on the perceived world
 		 */
 		private function updateTrueWorld():void {
+			//determine game delay is over
+			if (perceivedWorld.frame < 0 || trueWorld.frame > perceivedWorld.frame)
+				return;
+			
 			//determine frame to loop to
 			var leastFrame:Number = Math.min(conn.lastFrameReceived, perceivedWorld.frame-1); //eventually update this to accept multiple players
 			
@@ -326,9 +332,6 @@ package net.flashpunk.rollback {
 			else
 				return;
 			
-			//reset count
-			perceivedUpdateCount = 0;
-			
 			//declare variables
 			var commandToCheck:Command;
 			
@@ -360,9 +363,6 @@ package net.flashpunk.rollback {
 				
 				//update perceived world
 				perceivedWorld.update();
-				
-				//increment count
-				perceivedUpdateCount++;
 				
 				//increment next frame
 				nextFrameTime += perceivedWorld.frameRate;

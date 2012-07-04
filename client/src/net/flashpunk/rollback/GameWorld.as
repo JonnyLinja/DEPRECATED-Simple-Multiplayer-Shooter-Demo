@@ -4,30 +4,10 @@ package net.flashpunk.rollback {
 	import net.flashpunk.Rollbackable;
 	
 	public class GameWorld extends RollbackableWorld {
-		private var _frameRate:uint;
-		private var _frameElapsed:Number;
 		
 		public function GameWorld(frameRate:uint) {
 			//super
-			super();
-			
-			//save frame rate
-			_frameRate = frameRate;
-			_frameElapsed = frameRate * .001;
-		}
-		
-		/**
-		 * Getter
-		 */
-		public function get frameRate():uint {
-			return _frameRate;
-		}
-		
-		/**
-		 * Getter
-		 */
-		public function get frameElapsed():Number {
-			return _frameElapsed;
+			super(frameRate);
 		}
 		
 		/**
