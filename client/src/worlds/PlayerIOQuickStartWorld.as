@@ -26,7 +26,8 @@ package worlds {
 		
 		//server general constants
 		private const GAME_ID:String = ""; //(Get your own at playerio.com. 1: Create user, 2:Goto admin pannel, 3:Create game, 4: Copy game id inside the "")
-		private const GAME_TYPE:String = "Shooter";
+		private const SHOOTER_GAME_TYPE:String = "Shooter";
+		private const LOBBY_GAME_TYPE:String = "Lobby";
 		private const ROOM_LOBBY:String = "LOBBY";
 		
 		//server message constants
@@ -83,7 +84,7 @@ package worlds {
 			//join lobby
 			client.multiplayer.createJoinRoom(
 				ROOM_LOBBY,							//Room id. If set to null a random roomid is used
-				GAME_TYPE,							//The game type started on the server
+				LOBBY_GAME_TYPE,					//The game type started on the server
 				true,								//Should the room be visible in the lobby?
 				{},									//Room data. This data is returned to lobby list. Variabels can be modifed on the server
 				{},									//User join data
@@ -153,7 +154,7 @@ package worlds {
 			//join room
 			this.client.multiplayer.createJoinRoom(
 				newRoom,							//Room id. If set to null a random roomid is used
-				GAME_TYPE,							//The game type started on the server
+				SHOOTER_GAME_TYPE,					//The game type started on the server
 				true,								//Should the room be visible in the lobby?
 				{},									//Room data. This data is returned to lobby list. Variabels can be modifed on the server
 				{},									//User join data
