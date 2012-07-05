@@ -41,13 +41,11 @@ package net.flashpunk.rollback {
 		private var shouldRender:Boolean = false;
 		private var fighting:Boolean = false;
 		
-		public function PlayWorld(isP1:Boolean, frameDelay:uint, frameMinSend:uint, conn:GameConnection) {
+		public function PlayWorld(frameDelay:uint, frameMinSend:uint, conn:GameConnection) {
 			//set variables
-			this.isP1 = isP1;
 			this.frameDelay = frameDelay + 1;
 			this.frameMinSend = frameMinSend;
 			this.conn = conn;
-			nextFrameTime = 0; //getTimer();
 			
 			//factory worlds
 			perceivedWorld = createGameWorld();
@@ -135,7 +133,8 @@ package net.flashpunk.rollback {
 			return result;
 		}
 		
-		private function fight(frameStart:uint):void {
+		private function fight(isP1:Boolean, frameStart:uint):void {
+			this.isP1 = isP1;
 			fighting = true;
 			nextFrameTime = frameStart;
 		}

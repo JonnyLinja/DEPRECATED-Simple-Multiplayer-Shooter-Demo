@@ -26,9 +26,9 @@ package worlds {
 		private var d:Boolean = false;
 		private var mouse:Boolean = false;
 		
-		public function ShooterPlayWorld(isP1:Boolean, conn:Connection) {
+		public function ShooterPlayWorld(conn:Connection) {
 			//super
-			super(isP1, 2, 2, new PlayerIOGameConnection(isP1, conn));
+			super(2, 2, new PlayerIOGameConnection(conn));
 		}
 		
 		/**

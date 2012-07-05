@@ -167,13 +167,13 @@ namespace MyGame {
 
             //send fight command while delaying one client so both start at same time
             if (averageDifference > 0) {
-                p2.Send(GameCode.fight, (uint)(delay + averageDifference));
-                p1.Send(GameCode.fight, delay);
+                p2.Send(GameCode.fight, false, (uint)(delay + averageDifference));
+                p1.Send(GameCode.fight, true, delay);
                 Console.WriteLine("sending p2 " + (uint)(delay + averageDifference));
                 Console.WriteLine("sending p1 " + delay);
             }else {
-                p2.Send(GameCode.fight, delay);
-                p1.Send(GameCode.fight, (uint)(delay - averageDifference));
+                p2.Send(GameCode.fight, false, delay);
+                p1.Send(GameCode.fight, true, (uint)(delay - averageDifference));
                 Console.WriteLine("sending p2 " + delay);
                 Console.WriteLine("sending p1 " + (uint)(delay - averageDifference));
             }

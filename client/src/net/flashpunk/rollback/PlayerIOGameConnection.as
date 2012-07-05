@@ -18,9 +18,8 @@ package net.flashpunk.rollback {
 		private const MESSAGE_SYNC_START_TIME:String = "S";
 		private var isP1:Boolean; //which player you are, eventually will have player int inside responses for multiple players instead
 		
-		public function PlayerIOGameConnection(isP1:Boolean, conn:Connection) {
+		public function PlayerIOGameConnection(conn:Connection) {
 			//save variables
-			this.isP1 = isP1;
 			this.conn = conn;
 			
 			//handler
@@ -35,12 +34,15 @@ package net.flashpunk.rollback {
 			//set mode
 			syncingStartTime = false;
 			
+			//set isP1
+			isP1 = m.getBoolean(0);
+			
 			//inform delegate
-			receivedFightCommandCallback(m.getUInt(0) + firstTime);
+			receivedFightCommandCallback(isP1, m.getUInt(1) + firstTime);
 			
 			//temp debug
-			var shit:uint = m.getUInt(0) + firstTime;
-			Utils.log(shit + " = " + m.getUInt(0) + " + " + firstTime);
+			var shit:uint = m.getUInt(1) + firstTime;
+			Utils.log(shit + " = " + m.getUInt(1) + " + " + firstTime);
 			
 			//remove observer
 			conn.removeMessageHandler(MESSAGE_FIGHT, fight);
