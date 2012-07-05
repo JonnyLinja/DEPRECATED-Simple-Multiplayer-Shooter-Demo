@@ -1,4 +1,5 @@
 package worlds {
+	import flash.media.Video;
 	import net.flashpunk.World;
 	import net.flashpunk.FP;
 	
@@ -184,9 +185,31 @@ package worlds {
 			//remove handler
 			this.conn.removeMessageHandler(MESSAGE_START, handleStart);
 			
+			//temp debug
+			startTime = getTimer();
+			isP1 = m.getBoolean(0);
+			
 			//play game
-			FP.world = new ShooterPlayWorld(m.getBoolean(0), conn);
+			if (isP1)
+				//p1 starts game now
+				FP.world = new ShooterPlayWorld(m.getBoolean(0), conn);
 		}
+		
+		override public function update():void {
+			//super
+			super.update();
+			
+			if (startTime != 0 && !isP1) {
+				if (getTimer() - startTime > 10000) {
+					//p2 starts game 10 seconds later
+					FP.world = new ShooterPlayWorld(isP1, conn);
+				}
+			}
+		}
+		
+		//shit
+		private var startTime:uint = 0;
+		private var isP1:Boolean;
 	}
 
 }
