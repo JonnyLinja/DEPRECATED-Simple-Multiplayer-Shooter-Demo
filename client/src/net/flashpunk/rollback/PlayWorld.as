@@ -26,8 +26,8 @@ package net.flashpunk.rollback {
 		private var perceivedCommand:Command; //last executed perceived command
 		
 		//frames
-		private var frameDelay:uint = 3; //how many frames to delay inputs by - has to be at least 1!
-		private var frameMinSend:uint = 10; //tries sends mouse position - was set to 10!
+		private var frameDelay:uint; //how many frames to delay inputs by - has to be at least 1!
+		private var frameMinSend:uint; //tries sends mouse position - was set to 10!
 		
 		//time
 		private var currentTime:uint = 0;
@@ -38,7 +38,8 @@ package net.flashpunk.rollback {
 		
 		//boolean checks
 		private var isP1:Boolean; //eventually be able to handle more than 2 players, no longer boolean then
-		private var shouldRender:Boolean = true;
+		private var shouldRender:Boolean = false;
+		private var fighting:Boolean = false;
 		
 		public function PlayWorld(isP1:Boolean, frameDelay:uint, frameMinSend:uint, conn:GameConnection) {
 			//set variables
@@ -46,7 +47,7 @@ package net.flashpunk.rollback {
 			this.frameDelay = frameDelay + 1;
 			this.frameMinSend = frameMinSend;
 			this.conn = conn;
-			nextFrameTime = getTimer();
+			nextFrameTime = 0; //getTimer();
 			
 			//factory worlds
 			perceivedWorld = createGameWorld();
@@ -69,7 +70,8 @@ package net.flashpunk.rollback {
 			perceivedWorld.beginSync();
 			
 			//set delegate
-			conn.callback = receivedCommands;
+			conn.receivedCommandsCallback = receivedCommands;
+			conn.receivedFightCommandCallback = fight;
 		}
 		
 		/**
@@ -131,6 +133,11 @@ package net.flashpunk.rollback {
 			}
 			
 			return result;
+		}
+		
+		private function fight(frameStart:uint):void {
+			fighting = true;
+			nextFrameTime = frameStart;
 		}
 		
 		/**
@@ -212,16 +219,24 @@ package net.flashpunk.rollback {
 			//super
 			super.update();
 			
-			//set current time
-			currentTime = getTimer();
-			
-			//set elapsed
-			FP.elapsed = trueWorld.frameElapsed;
-			
-			//updates
-			updateTrueWorld();
-			updatePerceivedWorld();
-			updateInputsPrivate();
+			if (!fighting) {
+				//currently in syncing start time mode
+				//kinda hackish
+				conn.update();
+			}else {
+				//currently playing the game
+				
+				//set current time
+				currentTime = getTimer();
+				
+				//set elapsed
+				FP.elapsed = trueWorld.frameElapsed;
+				
+				//updates
+				updateTrueWorld();
+				updatePerceivedWorld();
+				updateInputsPrivate();
+			}
 		}
 		
 		/**

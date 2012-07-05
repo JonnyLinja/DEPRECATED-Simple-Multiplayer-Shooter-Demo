@@ -4,26 +4,53 @@ package net.flashpunk.rollback {
 	
 	import net.flashpunk.rollback.BlankCommand;
 	import net.flashpunk.rollback.Command;
-	
 	import net.flashpunk.utils.Input;
+	
+	//temp debug
+	import general.Utils;
 	
 	public class PlayerIOGameConnection extends GameConnection {
 		//playerio variables
 		private var conn:Connection;
 		private var m:Message;
 		private const MESSAGE_COMMANDS:String = "C";
+		private const MESSAGE_FIGHT:String = "F";
+		private const MESSAGE_SYNC_START_TIME:String = "S";
 		private var isP1:Boolean; //which player you are, eventually will have player int inside responses for multiple players instead
 		
 		public function PlayerIOGameConnection(isP1:Boolean, conn:Connection) {
-			//super
-			super();
-			
 			//save variables
 			this.isP1 = isP1;
 			this.conn = conn;
 			
 			//handler
+			conn.addMessageHandler(MESSAGE_FIGHT, fight);
 			conn.addMessageHandler(MESSAGE_COMMANDS, receivedCommands);
+			
+			//super
+			super();
+		}
+		
+		private function fight(m:Message):void {
+			//set mode
+			syncingStartTime = false;
+			
+			//inform delegate
+			receivedFightCommandCallback(m.getUInt(0) + firstTime);
+			
+			//temp debug
+			var shit:uint = m.getUInt(0) + firstTime;
+			Utils.log(shit + " = " + m.getUInt(0) + " + " + firstTime);
+			
+			//remove observer
+			conn.removeMessageHandler(MESSAGE_FIGHT, fight);
+		}
+		
+		override protected function sendStartSyncCommand():void {
+			Utils.log("sending start sync command");
+			m = conn.createMessage(MESSAGE_SYNC_START_TIME);
+			conn.sendMessage(m);
+			m = null;
 		}
 		
 		override public function get hasOutgoing():Boolean {
@@ -87,8 +114,7 @@ package net.flashpunk.rollback {
 			}
 			
 			//inform delegate
-			callback(commandArray);
-			//delegate.receivedCommands(commandArray);
+			receivedCommandsCallback(commandArray);
 			
 			//set null
 			commandArray = null;
