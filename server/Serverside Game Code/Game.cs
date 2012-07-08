@@ -7,9 +7,9 @@ using System.Drawing;
 
 namespace MyGame {
 	public class Player : BasePlayer {
-        public long[] receivedSyncTimes = new long[10];
+        public const int maxCount = 11;
+        public long[] receivedSyncTimes = new long[maxCount];
         public int receivedSyncCount = 0;
-        public const int maxCount = 10;
 	}
 
     [RoomType("Lobby")]
@@ -92,12 +92,15 @@ namespace MyGame {
                     //you are second player, save
                     p2 = player;
 
-                    //game, both have entered, send the start indicator
-                    p1.Send(GameCode.MESSAGE_START, true);
-                    p2.Send(GameCode.MESSAGE_START, false);
+                    //wait 5 seconds for clients to stablize ping from joining
+                    ScheduleCallback(delegate {
+                        //game, both have entered, send the start indicator
+                        p1.Send(GameCode.MESSAGE_START, true);
+                        p2.Send(GameCode.MESSAGE_START, false);
 
-                    //save start time
-                    startTime = DateTime.Now.Ticks;
+                        //save start time
+                        startTime = DateTime.Now.Ticks;
+                    }, 5000);
                 }
             }
 		}
@@ -148,46 +151,68 @@ namespace MyGame {
             fighting = true;
 
             //declare variables
-            int averageDifference = 0;
-            long diff = 0;
-            int diffInMilli = 0;
+            long[] differences = new long[Player.maxCount];
+            long differenceMean = 0;
+            Boolean p1Ahead = false;
 
-            //calculate difference
+            //fill differences array
             for (int i = 0; i < Player.maxCount; i++ ) {
-                //difference in ticks
-                diff = p1.receivedSyncTimes[i] - p2.receivedSyncTimes[i];
+                //array of differences
+                differences[i] = p1.receivedSyncTimes[i] - p2.receivedSyncTimes[i];
+                Console.WriteLine("difference " + i + ": " + differences[i]);
 
-                Console.WriteLine("diff before milliseconds " + diff);
-                diffInMilli = (int)(new TimeSpan(diff)).TotalMilliseconds;
-                Console.WriteLine("diff in milli " + diffInMilli);
-
-                //add to average difference
-                averageDifference += diffInMilli;
+                //sum
+                differenceMean += differences[i];
             }
 
-            Console.WriteLine("average before divide " + averageDifference);
+            //calculate mean
+            differenceMean /= Player.maxCount;
+            Console.WriteLine("difference mean " + differenceMean);
 
-            //divide for full average
-            averageDifference /= Player.maxCount;
+            //set larger
+            if (differenceMean > 0)
+                p1Ahead = true;
 
-            Console.WriteLine("average after divide " + averageDifference);
+            //standard deviation
+            double standardDeviation = 0;
+            for (int i = 0; i < Player.maxCount; i++) {
+                //sum square of differences
+                standardDeviation += Math.Pow(differences[i] - differenceMean, 2);
+            }
+            //final calculation
+            standardDeviation = Math.Sqrt(standardDeviation/Player.maxCount);
+            Console.WriteLine("standard deviation is " + standardDeviation);
+
+            //sort differences array
+            Array.Sort(differences);
+
+            //final calculation
+            differenceMean = 0;
+            long median = differences[Player.maxCount/2];
+            int count = 0;
+            Console.WriteLine("median is " + median);
+            for (int i = 0; i < Player.maxCount; i++) {
+                Console.WriteLine("testing sort " + i + ": " + differences[i]);
+                if (Math.Abs(differences[i] - median) <= standardDeviation) {
+                    Console.WriteLine("using " + differences[i]);
+                    differenceMean += differences[i];
+                    count++;
+                }
+            }
+
+            //mean of the remaining onces
+            differenceMean /= count;
+            Console.WriteLine("final mean: " + differenceMean);
 
             //base delay
-            uint delay = (uint)((new TimeSpan(DateTime.Now.Ticks - startTime)).Milliseconds + START_BUFFER);
+            uint delay = (uint)((new TimeSpan(DateTime.Now.Ticks - startTime)).TotalMilliseconds + START_BUFFER);
 
-            Console.WriteLine("delay before adding diff " + delay);
-
-            //send fight command while delaying one client so both start at same time
-            if (averageDifference > 0) {
-                p2.Send(GameCode.MESSAGE_FIGHT, false, (uint)(delay + averageDifference));
-                p1.Send(GameCode.MESSAGE_FIGHT, true, delay);
-                Console.WriteLine("sending p2 " + (uint)(delay + averageDifference));
-                Console.WriteLine("sending p1 " + delay);
-            }else {
+            if (p1Ahead) {
+                p1.Send(GameCode.MESSAGE_FIGHT, true, (uint)(delay + new TimeSpan(differenceMean).TotalMilliseconds));
                 p2.Send(GameCode.MESSAGE_FIGHT, false, delay);
-                p1.Send(GameCode.MESSAGE_FIGHT, true, (uint)(delay - averageDifference));
-                Console.WriteLine("sending p2 " + delay);
-                Console.WriteLine("sending p1 " + (uint)(delay - averageDifference));
+            }else {
+                p1.Send(GameCode.MESSAGE_FIGHT, true, delay);
+                p2.Send(GameCode.MESSAGE_FIGHT, false, (uint)(delay + new TimeSpan(differenceMean).TotalMilliseconds));
             }
         }
 
