@@ -30,6 +30,9 @@ package entities {
 		//collisions
 		public static const COLLISION_TYPE:String = "person";
 		
+		//hp
+		public var _hp:int = 10;
+		
 		public function Person(x:Number=0, y:Number=0, image:Class=null, w:uint=0, h:uint=0) {
 			//super
 			super(x, y, image, w, h);
@@ -43,6 +46,10 @@ package entities {
 			
 			//collision type
 			type = COLLISION_TYPE;
+			
+			//tint
+			sprite_map.tintMode = 1.0;
+			sprite_map.tinting = 0.2;
 		}
 		
 		public function get mouseDown():Boolean {
@@ -59,6 +66,20 @@ package entities {
 				bullet.x = centerX - bullet.halfWidth;
 				bullet.y = centerY - bullet.halfHeight;
 				bullet.calculateVector(mouseX, mouseY);
+			}
+		}
+		
+		public function get hp():int {
+			return _hp;
+		}
+		
+		public function set hp(hp:int):void {
+			//save
+			_hp = hp;
+			
+			//visual effect
+			if (_hp > 0) {
+				sprite_map.tinting = (Number)(((1 - (hp * .1)) * 0.8) + 0.2);
 			}
 		}
 		

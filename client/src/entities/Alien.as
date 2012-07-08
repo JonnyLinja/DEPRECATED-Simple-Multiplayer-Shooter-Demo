@@ -13,6 +13,9 @@ package entities {
 		public function Alien(x:Number = 0, y:Number = 0) {
 			//super
 			super(x, y, image, W, H);
+			
+			//tint color
+			sprite_map.color = 0x0000FF;
 		}
 	}
 }

@@ -191,21 +191,7 @@ package worlds {
 			isP1 = m.getBoolean(0);
 			
 			//play game
-			if (isP1)
-				//p1 starts game now
-				FP.world = new ShooterPlayWorld(conn);
-		}
-		
-		override public function update():void {
-			//super
-			super.update();
-			
-			if (startTime != 0 && !isP1) {
-				if (getTimer() - startTime > 10000) {
-					//p2 starts game 10 seconds later
-					FP.world = new ShooterPlayWorld(conn);
-				}
-			}
+			FP.world = new ShooterPlayWorld(conn);
 		}
 		
 		//shit

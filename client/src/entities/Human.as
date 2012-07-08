@@ -13,6 +13,9 @@ package entities {
 		public function Human(x:Number = 0, y:Number = 0) {
 			//super
 			super(x, y, image, W, H);
+			
+			//tint color
+			sprite_map.color = 0xFF0000;
 		}
 	}
 }

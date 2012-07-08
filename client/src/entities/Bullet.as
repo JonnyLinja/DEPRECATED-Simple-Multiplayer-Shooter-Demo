@@ -52,11 +52,17 @@ package entities {
 			super.update();
 			
 			//collisions
-			if (collide(Person.COLLISION_TYPE, x, y)) {
+			var p:Person = collide(Person.COLLISION_TYPE, x, y) as Person;
+			if (p) {
+				//hp
+				p.hp--;
+				
+				//blood
 				var blood:Blood = world.create(Blood, true) as Blood;
 				blood.x = x - blood.halfWidth;
 				blood.y = y - blood.halfHeight;
 				
+				//recycle
 				world.recycle(this);
 			}
 

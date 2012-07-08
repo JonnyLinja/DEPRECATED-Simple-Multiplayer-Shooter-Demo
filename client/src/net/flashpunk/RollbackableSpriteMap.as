@@ -22,6 +22,16 @@ package net.flashpunk {
 				play(s.currentAnim);
 				index = s.index;
 			}
+			
+			//alpha
+			alpha = s.alpha;
+			
+			//tint
+			tinting = s.tinting;
+			tintMode = s.tintMode;
+			
+			//color
+			color = s.color;
 		}
 	}
 }
