@@ -79,7 +79,11 @@ package entities {
 			
 			//visual effect
 			if (_hp > 0) {
+				//tint
 				sprite_map.tinting = (Number)(((1 - (hp * .1)) * 0.8) + 0.2);
+			}else if(world) {
+				//recycle
+				world.recycle(this);
 			}
 		}
 		
