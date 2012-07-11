@@ -7,9 +7,10 @@ using System.Drawing;
 
 namespace MyGame {
 	public class Player : BasePlayer {
-        public const int maxCount = 11;
+        public const int maxCount = 31; //if send every 33ms, then 1 second to calculate it
         public long[] receivedSyncTimes = new long[maxCount];
         public int receivedSyncCount = 0;
+        public int ignoreCount = 100; //if send every 33ms, then 3.3 seconds of ignore to stabilize connection
 	}
 
     [RoomType("Lobby")]
@@ -92,15 +93,12 @@ namespace MyGame {
                     //you are second player, save
                     p2 = player;
 
-                    //wait 5 seconds for clients to stablize ping from joining
-                    ScheduleCallback(delegate {
-                        //game, both have entered, send the start indicator
-                        p1.Send(GameCode.MESSAGE_START, true);
-                        p2.Send(GameCode.MESSAGE_START, false);
+                    //game, both have entered, send the start indicator
+                    p1.Send(GameCode.MESSAGE_START, true);
+                    p2.Send(GameCode.MESSAGE_START, false);
 
-                        //save start time
-                        startTime = DateTime.Now.Ticks;
-                    }, 5000);
+                    //save start time
+                    startTime = DateTime.Now.Ticks;
                 }
             }
 		}
@@ -111,17 +109,24 @@ namespace MyGame {
                 //syncing the start time
                 case GameCode.MESSAGE_START: {
                     if (!fighting) {
-                        //store times in array if able
-                        if (player.receivedSyncCount < Player.maxCount) {
-                            player.receivedSyncTimes[player.receivedSyncCount++] = DateTime.Now.Ticks;
-                            if(p1 == player)
-                                Console.WriteLine("player1 added " + player.receivedSyncTimes[player.receivedSyncCount-1]);
-                            else
-                                Console.WriteLine("player2 added " + player.receivedSyncTimes[player.receivedSyncCount-1]);
-                        }
+                        if (player.ignoreCount > 0) {
+                            //ignore it - wait for it to stabilize
+                            player.ignoreCount--;
+                        }else {
+                            if (player.receivedSyncCount < Player.maxCount) {
+                                //store it
+                                player.receivedSyncTimes[player.receivedSyncCount++] = DateTime.Now.Ticks;
+
+                                //logging
+                                if(p1 == player)
+                                    Console.WriteLine("player1 added " + player.receivedSyncTimes[player.receivedSyncCount-1]);
+                                else
+                                    Console.WriteLine("player2 added " + player.receivedSyncTimes[player.receivedSyncCount-1]);
+                            }
                         
-                        //calculate start time
-                        CalculateStartTime();
+                            //calculate start time
+                            CalculateStartTime();
+                        }
                     }
                     //break
                     break;
