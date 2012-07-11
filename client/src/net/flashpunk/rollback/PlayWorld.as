@@ -14,6 +14,10 @@ package net.flashpunk.rollback {
 	
 	use namespace RollbackNamespace;
 	
+	//temp debug
+	import general.Utils;
+	import flash.system.*;
+	
 	public class PlayWorld extends World {
 		//worlds
 		private var perceivedWorld:GameWorld;
@@ -418,18 +422,56 @@ package net.flashpunk.rollback {
 		}
 		
 		/**
+		 * Destroys the command linked list
+		 */
+		private function destroyCommandList():void {
+			//declare variables
+			var c:Command = firstCommand;
+			var n:Command = null;
+			
+			//loop destroy
+			while (c) {
+				n = c.next;
+				c.next = null;
+				c.prev = null;
+				c = null;
+				c = n;
+			}
+			
+			//destroy holders
+			c = null;
+			n = null;
+			firstCommand = null;
+			lastCommand = null;
+			perceivedCommand = null;
+			trueCommand = null;
+		}
+		
+		/**
 		 * Destroys the command linked list and the two worlds upon finishing
 		 */
 		override public function end():void {
 			//super
 			super.end();
 			
+			//temp debug
+			Utils.log("ending playworld");
+			
 			//game worlds
 			trueWorld.end();
+			trueWorld = null;
 			perceivedWorld.end();
+			perceivedWorld = null;
+			
+			//commands
+			destroyCommandList();
 			
 			//connection
 			conn.terminate();
+			conn = null;
+			
+			//temp debug
+			System.gc();
 		}
 	}
 }

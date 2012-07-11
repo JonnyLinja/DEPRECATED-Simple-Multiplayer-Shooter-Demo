@@ -11,7 +11,7 @@ package entities {
 		
 		//sounds
 		[Embed(source = '../../sounds/BoulderDeath.mp3')]
-		private const BOOM:Class;
+		private static const BOOM:Class;
 		private var boom:RollbackableSfx = new RollbackableSfx(BOOM);
 		
 		//size
@@ -45,6 +45,15 @@ package entities {
 			//play
 			sprite_map.play("animate", true, 0);
 			boom.play();
+		}
+		
+		override public function destroy():void {
+			//super
+			super.destroy();
+			
+			//sfx
+			boom.stop();
+			boom = null;
 		}
 	}
 }

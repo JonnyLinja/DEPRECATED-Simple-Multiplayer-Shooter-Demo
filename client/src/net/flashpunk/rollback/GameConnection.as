@@ -8,7 +8,7 @@ package net.flashpunk.rollback {
 		protected var syncingStartTime:Boolean = true;
 		protected var firstTime:uint = 0;
 		private var lastTime:uint = 0;
-		private const sendRate:uint = 250;
+		private const sendRate:uint = 33;
 		
 		//gameplay variables
 		public var receivedCommandsCallback:Function;
@@ -74,7 +74,8 @@ package net.flashpunk.rollback {
 		}
 		
 		public function terminate():void {
-			
+			receivedCommandsCallback = null;
+			receivedFightCommandCallback = null;
 		}
 	}
 }

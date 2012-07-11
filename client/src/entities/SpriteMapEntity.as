@@ -33,5 +33,14 @@ package entities {
 			//roll back
 			sprite_map.rollback(s.sprite_map);
 		}
+		
+		override public function destroy():void {
+			//super
+			super.destroy();
+			
+			//sprites
+			sprite_map = null;
+			graphic = null;
+		}
 	}
 }

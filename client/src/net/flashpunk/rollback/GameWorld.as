@@ -4,7 +4,6 @@ package net.flashpunk.rollback {
 	import net.flashpunk.Rollbackable;
 	
 	public class GameWorld extends RollbackableWorld {
-		
 		public function GameWorld(frameRate:uint) {
 			//super
 			super(frameRate);

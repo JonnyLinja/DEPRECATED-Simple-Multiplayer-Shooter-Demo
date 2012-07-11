@@ -17,7 +17,7 @@ package entities {
 		
 		//sounds
 		[Embed(source = '../../sounds/Airball.mp3')]
-		private const SHOOT:Class;
+		private static const SHOOT:Class;
 		private var shoot:RollbackableSfx = new RollbackableSfx(SHOOT);
 		
 		//size
@@ -112,6 +112,15 @@ package entities {
 			//rollback
 			accelX = b.accelX;
 			accelY = b.accelY;
+		}
+		
+		override public function destroy():void {
+			//super
+			super.destroy();
+			
+			//sfx
+			shoot.stop();
+			shoot = null;
 		}
 	}
 }

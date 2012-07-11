@@ -500,11 +500,14 @@ package net.flashpunk {
 			//super
 			super.end();
 			
+			//temp debug
+			trace("ending rollbackable world");
+			
 			//remove
+			destroyMasterList();
+			destroyRecycled();
 			removeAll();
 			updateLists();
-			destroyRecycled();
-			destroyMasterList();
 		}
 		
 		/**
@@ -522,8 +525,17 @@ package net.flashpunk {
 				e._next = null;
 				e._world = null;
 				e.removed();
+				trace("destroying entity"); //temp debug
+				e.destroy();
 				e = n;
 			}
+			
+			//destroy holders
+			e = null;
+			n = null;
+			_firstEntity = null;
+			_lastEntity = null;
+			_syncPoint = null;
 		}
 		
 		/**
@@ -541,6 +553,8 @@ package net.flashpunk {
 				e._recycleNext = null;
 				e = n;
 			}
+			e = null;
+			n = null;
 			delete _recycled[classType];
 		}
 		

@@ -247,6 +247,36 @@ package net.flashpunk {
 		}
 		
 		/**
+		 * Destroys the Sfx linked list
+		 */
+		private function destroySfx():void {
+			trace("destroying sfx"); //temp debug
+			
+			//declare variables
+			var s:RollbackableSfx = _firstSfx;
+			var n:RollbackableSfx = null;
+			
+			//loop destroy
+			while (s) {
+				n = s.next;
+				s.next = null;
+				s.getStartFrame = null;
+				s = n;
+			}
+			
+			//destroy holders
+			_firstSfx = null;
+		}
+		
+		/**
+		 * Release all references
+		 */
+		public function destroy():void {
+			trace("destroy called"); //temp debug
+			destroySfx();
+		}
+		
+		/**
 		 * temp debug
 		 * @return
 		 */

@@ -130,6 +130,7 @@ package net.flashpunk.rollback {
 			conn.removeMessageHandler(MESSAGE_COMMANDS, receivedCommands);
 			conn.disconnect();
 			conn = null;
+			m = null;
 		}
 	}
 }

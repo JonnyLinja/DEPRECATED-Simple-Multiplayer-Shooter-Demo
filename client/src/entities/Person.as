@@ -61,7 +61,7 @@ package entities {
 			_mouseDown = m;
 			
 			//determine if make bullet
-			if (_mouseDown) {
+			if (_mouseDown && world) {
 				var bullet:Bullet = world.create(Bullet, true) as Bullet;
 				bullet.x = centerX - bullet.halfWidth;
 				bullet.y = centerY - bullet.halfHeight;

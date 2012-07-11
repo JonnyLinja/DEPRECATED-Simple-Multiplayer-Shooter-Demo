@@ -1,8 +1,6 @@
 package worlds {
 	import net.flashpunk.rollback.GameWorld;
-	
 	import net.flashpunk.FP;
-	
 	import net.flashpunk.rollback.Command;
 	
 	import entities.Person;
@@ -10,6 +8,8 @@ package worlds {
 	import entities.Human;
 	
 	import general.CommandList;
+	
+	import worlds.ScoreWorld;
 	
 	public class ShooterGameWorld extends GameWorld {
 		//entities
@@ -63,6 +63,27 @@ package worlds {
 					p.mouseDown = !p.mouseDown;
 					break;
 			}
+		}
+		
+		override public function update():void {
+			//super
+			super.update();
+			
+			//determine end world - slightly hackish with isTrue check but is easiest way
+			//problem is that playworld is mid execution when this is called
+			//can cause problems that way hrmm
+			//may want to do the callback method then
+			if (isTrueWorld && (p1.hp == 0 || p2.hp == 0))
+				FP.world = new ScoreWorld;
+		}
+		
+		override public function end():void {
+			//super
+			super.end();
+			
+			//people
+			p1 = null;
+			p2 = null;
 		}
 	}
 }

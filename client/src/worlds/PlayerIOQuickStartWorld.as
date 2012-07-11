@@ -187,15 +187,19 @@ package worlds {
 			this.conn.removeMessageHandler(MESSAGE_START, handleStart);
 			
 			//temp debug
-			startTime = getTimer();
 			isP1 = m.getBoolean(0);
 			
 			//play game
 			FP.world = new ShooterPlayWorld(conn);
+			
+			//remove references
+			conn = null;
+			client = null;
+			
+			//note still isn't released probably because handleConnect and handleError? 
 		}
 		
 		//shit
-		private var startTime:uint = 0;
 		private var isP1:Boolean;
 	}
 
